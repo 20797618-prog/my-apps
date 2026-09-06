@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "exportDate": "2026-05-09T08:30:26.409Z",
+  "bookmarks": [
+    {
+      "id": "1775213301068",
+      "name": "招牌审核（那个表）",
+      "url": "https://meiyijia.feishu.cn/base/U354b4QsAazrhAsA9GwcJeT4nOe?from=from_copylink",
+      "category": "招牌审核",
+      "tags": [
+        "登记表"
+      ],
+      "icon": "https://www.google.com/s2/favicons?domain=meiyijia.feishu.cn&sz=64",
+      "order": 0
+    },
+    {
+      "id": "1775213409860",
+      "name": "审核指引（自己看）",
+      "url": "https://meiyijia.feishu.cn/docx/Q162d2qzxouKdpx9KH0cjgIfn0f?from=from_copylink",
+      "category": "招牌审核",
+      "tags": [
+        "指引，自己看"
+      ],
+      "icon": "{\"type\":\"text\",\"text\":\"审核指引\",\"textColor\":\"#ffffff\",\"bgColor\":\"hsl(230.4100665156567, 70%, 60%)\",\"fontSize\":\"12px\"}",
+      "order": 1
+    },
+    {
+      "id": "1775213474546",
+      "name": "个人工作管理系统",
+      "url": "https://meiyijia.feishu.cn/wiki/Jc49wPfIpiqnrIku7nscSXT6njh?from=from_copylink",
+      "category": "系统",
+      "tags": [
+        "个人工作管理"
+      ],
+      "icon": "{\"type\":\"text\",\"text\":\"个人工作\",\"textColor\":\"#ffffff\",\"bgColor\":\"hsl(190.07917056083593, 70%, 60%)\",\"fontSize\":\"12px\"}",
+      "order": 2
+    },
+    {
+      "id": "1775213509815",
+      "name": "案件管理系统",
+      "url": "https://meiyijia.feishu.cn/wiki/Ut0dwSVDTiVGWvktyI7cB3UwnEd?from=from_copylink",
+      "category": "系统",
+      "tags": [
+        "案件管理"
+      ],
+      "icon": "{\"type\":\"text\",\"text\":\"案件管理\",\"textColor\":\"#ffffff\",\"bgColor\":\"hsl(310.06868237504875, 70%, 60%)\",\"fontSize\":\"12px\"}",
+      "order": 3
+    },
+    {
+      "id": "1775872107318",
+      "name": "数据输出",
+      "url": "https://meiyijia.feishu.cn/base/SzJobM7Efaeg4dsX1ehcAU5knMf?from=from_copylink",
+      "category": "数据输出",
+      "tags": [
+        "数据输出"
+      ],
+      "icon": "{\"type\":\"text\",\"text\":\"数据输出\",\"textColor\":\"#ffffff\",\"bgColor\":\"hsl(41.35435328149967, 70%, 60%)\",\"fontSize\":\"12px\"}",
+      "order": 4
+    },
+    {
+      "id": "1777021567667",
+      "name": "商务局备案登录",
+      "url": "https://ecomp.mofcom.gov.cn/loginCorp.html",
+      "category": "备案",
+      "tags": [
+        "备案"
+      ],
+      "icon": "{\"type\":\"text\",\"text\":\"商务局备\",\"textColor\":\"#ffffff\",\"bgColor\":\"hsl(126.80800179142146, 70%, 60%)\",\"fontSize\":\"12px\"}",
+      "order": 5
+    },
+    {
+      "id": "1777021604286",
+      "name": "备案查公示",
+      "url": "http://txjy.syggs.mofcom.gov.cn/",
+      "category": "备案",
+      "tags": [
+        "备案"
+      ],
+      "icon": "{\"type\":\"text\",\"text\":\"备案查公\",\"textColor\":\"#ffffff\",\"bgColor\":\"hsl(64.93582585313834, 70%, 60%)\",\"fontSize\":\"12px\"}",
+      "order": 6
+    },
+    {
+      "id": "1778201474236",
+      "name": "招牌拆除指引（发给大家看）",
+      "url": "https://meiyijia.feishu.cn/wiki/FFSVwJlHXiuX6ckwcDLcUIO6nng?from=from_copylink",
+      "category": "招牌审核",
+      "tags": [
+        "招牌审核，发给大家看，对外"
+      ],
+      "icon": "{\"type\":\"text\",\"text\":\"招牌拆除\",\"textColor\":\"#ffffff\",\"bgColor\":\"hsl(86.03845392665596, 70%, 60%)\",\"fontSize\":\"12px\"}",
+      "order": 7
+    }
+  ]
+}
