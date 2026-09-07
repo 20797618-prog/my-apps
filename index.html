@@ -832,8 +832,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     
     <script>
-        // 云端数据 API 地址（Cloudflare Worker，部署后自动填入）
-        const API_BASE_URL = 'https://nav-bookmarks-api.20797618.workers.dev';
+        // 云端数据 API 地址（与站点同源，走 Cloudflare Pages Functions，避免跨域/域名拦截）
+        const API_BASE_URL = '';
         // 登录成功后保存的口令哈希，用于鉴权请求
         let authToken = null;
 

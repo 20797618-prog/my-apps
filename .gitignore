@@ -6,3 +6,6 @@ node_modules/
 
 # 系统文件
 .DS_Store
+
+# 项目记忆与本地元数据（不入库）
+.workbuddy/
