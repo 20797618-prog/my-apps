@@ -13,33 +13,37 @@
         }
 
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3a0ca3;
-            --background-color: #f8f9fa;
-            --card-background: #ffffff;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-            --success-color: #4caf50;
-            --danger-color: #f44336;
-            --warning-color: #ff9800;
+            --primary-color: #6B5B3E;
+            --secondary-color: #4A4034;
+            --background-color: #F4EFE3;
+            --card-background: #FCF9F1;
+            --text-color: #38332B;
+            --muted-color: #857C6B;
+            --border-color: #E3DBC7;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            --success-color: #5a7d4a;
+            --danger-color: #b0563a;
+            --warning-color: #b8860b;
         }
 
         body.dark-theme {
-            --background-color: #1a1a2e;
-            --card-background: #16213e;
-            --text-color: #e6e6e6;
-            --border-color: #2d3748;
+            --primary-color: #C8A05A;
+            --secondary-color: #E0C07A;
+            --background-color: #2A2520;
+            --card-background: #332D26;
+            --text-color: #E5DCC8;
+            --muted-color: #9A8F7C;
+            --border-color: #4A443A;
         }
 
         body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-family: Georgia, 'Songti SC', 'Noto Serif SC', 'STSong', serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            line-height: 1.6;
+            line-height: 1.7;
             transition: background-color 0.3s, color 0.3s;
-            padding: 20px;
+            padding: 24px;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -69,8 +73,9 @@
         }
 
         .logo h1 {
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: 1px;
         }
 
         .actions {
@@ -97,7 +102,7 @@
         .search-box input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+            box-shadow: 0 0 0 2px rgba(107, 91, 62, 0.12);
         }
 
         .search-box i {
@@ -105,7 +110,7 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: #999;
+            color: var(--muted-color);
         }
 
         .btn {
@@ -251,17 +256,21 @@
 
         .bookmark-card {
             background-color: var(--card-background);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
+            border-radius: 14px;
+            padding: 16px;
+            border: 0.5px solid var(--border-color);
+            transition: all 0.25s;
             cursor: pointer;
             position: relative;
-            border: 2px solid transparent;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
         }
 
         .bookmark-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
             box-shadow: var(--hover-shadow);
         }
 
@@ -276,11 +285,12 @@
             width: 20px;
             height: 20px;
             border-radius: 4px;
-            border: 2px solid var(--border-color);
+            border: 1.5px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: var(--card-background);
+            z-index: 2;
         }
 
         .bookmark-card.selected .checkbox {
@@ -290,21 +300,23 @@
 
         .bookmark-card.selected .checkbox::after {
             content: '✓';
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
+            color: var(--card-background);
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .bookmark-icon {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
-            font-size: 24px;
+            font-size: 18px;
+            flex-shrink: 0;
             overflow: hidden;
+            position: relative;
+            font-family: Georgia, 'Songti SC', serif;
         }
 
         .bookmark-icon img {
@@ -313,14 +325,14 @@
             object-fit: cover;
         }
 
-        .bookmark-icon i {
-            color: var(--primary-color);
+        .bookmark-body {
+            flex: 1;
+            min-width: 0;
         }
 
         .bookmark-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 500;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -328,25 +340,26 @@
 
         .bookmark-url {
             font-size: 12px;
-            color: #888;
+            color: var(--muted-color);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            margin-bottom: 12px;
+            margin-top: 2px;
         }
 
         .bookmark-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 6px;
+            flex-basis: 100%;
         }
 
         .tag {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary-color);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
+            background-color: var(--background-color);
+            color: var(--muted-color);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
         }
 
         .bookmark-actions {
@@ -366,7 +379,7 @@
         .bookmark-actions button {
             background: none;
             border: none;
-            color: #888;
+            color: var(--muted-color);
             cursor: pointer;
             width: 30px;
             height: 30px;
@@ -386,13 +399,13 @@
             grid-column: 1 / -1;
             text-align: center;
             padding: 60px 20px;
-            color: #888;
+            color: var(--muted-color);
         }
 
         .empty-state i {
             font-size: 48px;
             margin-bottom: 20px;
-            color: #ddd;
+            color: var(--border-color);
         }
 
         .modal {
@@ -432,7 +445,7 @@
 
         .modal-title {
             font-size: 20px;
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .modal-close {
@@ -440,7 +453,7 @@
             border: none;
             font-size: 20px;
             cursor: pointer;
-            color: #888;
+            color: var(--muted-color);
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -481,7 +494,7 @@
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+            box-shadow: 0 0 0 2px rgba(107, 91, 62, 0.12);
         }
 
         .form-actions {
@@ -494,7 +507,7 @@
         .footer {
             text-align: center;
             padding: 20px;
-            color: #888;
+            color: var(--muted-color);
             font-size: 14px;
             border-top: 1px solid var(--border-color);
         }
@@ -577,7 +590,7 @@
         .close-urls-btn {
             background: none;
             border: none;
-            color: #888;
+            color: var(--muted-color);
             cursor: pointer;
             position: absolute;
             top: 5px;
@@ -625,7 +638,7 @@
         }
 
         .login-card p {
-            color: #888;
+            color: var(--muted-color);
             font-size: 14px;
             margin-bottom: 18px;
         }
@@ -686,7 +699,7 @@
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
             <h2>请输入访问口令</h2>
-            <p>登录成功后将自动导入最新书签数据</p>
+            <p>登录后自动同步云端最新书签</p>
             <form id="loginForm">
                 <div class="form-group">
                     <input type="password" id="passphraseInput" class="form-control" placeholder="请输入口令" autocomplete="off" required>
@@ -701,7 +714,7 @@
     <div class="header">
         <div class="logo">
             <i class="fas fa-compass"></i>
-            <h1>网站导航仪表板</h1>
+            <h1>简约导航</h1>
         </div>
         <div class="actions">
             <div class="search-box">
@@ -1381,6 +1394,43 @@
             });
         }
 
+        // 柔和暖色系图标色板（Kindle 风）
+        const ICON_PALETTE = [
+            { bg: '#EDE4D0', fg: '#6B5B3E' },
+            { bg: '#E4ECE6', fg: '#4A6B58' },
+            { bg: '#E5E7ED', fg: '#4A5368' },
+            { bg: '#F0E4DE', fg: '#7A5647' },
+            { bg: '#EBE6D2', fg: '#7A6A3E' },
+            { bg: '#E9E8E0', fg: '#5C5C50' }
+        ];
+
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+            }
+            return hash;
+        }
+
+        // 渲染图标：favicon 优先，失败或缺失时回退到柔和色首字母块
+        function renderIcon(bookmark) {
+            const name = bookmark.name || '';
+            const idx = hashString(name) % ICON_PALETTE.length;
+            const c = ICON_PALETTE[idx];
+            const letter = name.trim().charAt(0) || '?';
+            const fallback = `<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:${c.bg};color:${c.fg};border-radius:12px;">${letter}</span>`;
+
+            const isFavicon = bookmark.icon &&
+                typeof bookmark.icon === 'string' &&
+                /^https?:\/\//.test(bookmark.icon);
+
+            if (!isFavicon) {
+                return fallback;
+            }
+
+            return `${fallback}<img src="${bookmark.icon}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.remove();">`;
+        }
+
         // 渲染书签
         function renderBookmarks() {
             // 过滤书签
@@ -1422,14 +1472,11 @@
                     return `
                         <div class="bookmark-card ${isSelected ? 'selected' : ''}" data-id="${bookmark.id}">
                             <div class="checkbox"></div>
-                            <div class="bookmark-icon">
-                                ${bookmark.icon 
-                                    ? `<img src="${bookmark.icon}" alt="${bookmark.name}" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\"fas fa-globe\"></i>';" />`
-                                    : `<i class="fas fa-globe"></i>`
-                                }
+                            <div class="bookmark-icon">${renderIcon(bookmark)}</div>
+                            <div class="bookmark-body">
+                                <div class="bookmark-title">${bookmark.name}</div>
+                                <div class="bookmark-url">${bookmark.url.replace(/^https?:\/\//, '')}</div>
                             </div>
-                            <div class="bookmark-title">${bookmark.name}</div>
-                            <div class="bookmark-url">${bookmark.url.replace(/^https?:\/\//, '')}</div>
                             <div class="bookmark-tags">${tags}</div>
                             <div class="bookmark-actions">
                                 <button class="edit-btn" title="编辑">
