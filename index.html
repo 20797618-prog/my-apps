@@ -819,11 +819,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     
     <script>
-        const ACCESS_PASSPHRASE = '20797618';
-        const LATEST_BACKUP_FILES = [
-            'bookmarks-backup-2026-09-06.json',
-            'bookmarks-backup-2026-05-09.json'
-        ];
+        // 云端数据 API 地址（Cloudflare Worker，部署后自动填入）
+        const API_BASE_URL = 'https://nav-bookmarks-api.20797618.workers.dev';
+        // 登录成功后保存的口令哈希，用于鉴权请求
+        let authToken = null;
+
+        // 计算 sha256 十六进制摘要
+        async function sha256Hex(text) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+            return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
         // 应用程序状态
         const state = {
@@ -906,53 +911,6 @@
         function hideLoginOverlay() {
             document.body.classList.remove('app-locked');
             elements.loginOverlay.classList.remove('active');
-        }
-
-        async function handleLoginSuccess() {
-            hideLoginOverlay();
-            showToast('口令正确，正在导入最新数据...', 1600);
-            await autoImportLatestData();
-        }
-
-        async function autoImportLatestData() {
-            for (const fileName of LATEST_BACKUP_FILES) {
-                try {
-                    const response = await fetch(fileName, { cache: 'no-store' });
-                    if (!response.ok) {
-                        continue;
-                    }
-
-                    const data = await response.json();
-                    if (!data.bookmarks || !Array.isArray(data.bookmarks)) {
-                        continue;
-                    }
-
-                    const isValid = data.bookmarks.every(b =>
-                        b.id && b.name && b.url && typeof b.name === 'string' && typeof b.url === 'string'
-                    );
-
-                    if (!isValid) {
-                        continue;
-                    }
-
-                    state.bookmarks = data.bookmarks.map((bookmark, index) => ({
-                        ...bookmark,
-                        order: bookmark.order !== undefined ? bookmark.order : index,
-                        category: bookmark.category || '未分类'
-                    }));
-
-                    state.selectedBookmarks.clear();
-                    saveBookmarks();
-                    renderCategories();
-                    renderBookmarks();
-                    showToast(`已自动导入最新数据：${fileName}`, 2600);
-                    return;
-                } catch (error) {
-                    console.warn(`自动导入失败：${fileName}`, error);
-                }
-            }
-
-            showToast('未找到可用的最新备份，已使用本地数据', 2600);
         }
 
         // 初始化主题
@@ -1063,10 +1021,40 @@
             }
         }
 
-        // 保存书签数据
-        function saveBookmarks() {
+        // 保存书签数据到浏览器本地
+        function saveLocal() {
             localStorage.setItem('bookmarkDashboard', JSON.stringify(state.bookmarks));
             elements.totalCount.textContent = state.bookmarks.length;
+        }
+
+        // 防抖自动保存到云端（登录后生效，增删改/拖拽/导入都会触发）
+        let cloudSaveTimer = null;
+        function saveToCloud() {
+            if (!authToken) return;
+            clearTimeout(cloudSaveTimer);
+            cloudSaveTimer = setTimeout(async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/bookmarks`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': authToken
+                        },
+                        body: JSON.stringify({ bookmarks: state.bookmarks })
+                    });
+                    if (!response.ok) {
+                        showToast('云端保存失败，请检查网络', 2500);
+                    }
+                } catch (error) {
+                    console.warn('云端保存异常', error);
+                }
+            }, 400);
+        }
+
+        // 保存书签数据（本地 + 云端）
+        function saveBookmarks() {
+            saveLocal();
+            saveToCloud();
         }
 
         // 初始化事件监听器
@@ -1093,21 +1081,60 @@
             // 文件选择变化事件（导入）
             elements.importFileInput.addEventListener('change', handleFileImport);
 
-            // 登录事件
+            // 登录事件：输入口令 -> 云端校验 -> 拉取最新数据
             elements.loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const passphrase = elements.passphraseInput.value.trim();
-
-                if (passphrase !== ACCESS_PASSPHRASE) {
-                    showToast('口令错误，请重试', 1800);
-                    elements.passphraseInput.value = '';
-                    elements.passphraseInput.focus();
+                if (!passphrase) {
                     return;
                 }
 
                 elements.loginSubmitBtn.disabled = true;
                 try {
-                    await handleLoginSuccess();
+                    const token = await sha256Hex(passphrase);
+
+                    let response;
+                    try {
+                        response = await fetch(`${API_BASE_URL}/api/bookmarks`, {
+                            headers: { 'X-Auth-Token': token },
+                            cache: 'no-store'
+                        });
+                    } catch (error) {
+                        showToast('网络错误，请检查连接后重试', 2000);
+                        return;
+                    }
+
+                    if (response.status === 401) {
+                        showToast('口令错误，请重试', 1800);
+                        elements.passphraseInput.value = '';
+                        elements.passphraseInput.focus();
+                        return;
+                    }
+                    if (!response.ok) {
+                        showToast('服务器错误，请稍后重试', 2000);
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    // 登录成功，记录口令哈希用于后续自动保存
+                    authToken = token;
+
+                    // 用云端最新数据覆盖本地
+                    if (data.bookmarks && Array.isArray(data.bookmarks)) {
+                        state.bookmarks = data.bookmarks.map((bookmark, index) => ({
+                            ...bookmark,
+                            order: bookmark.order !== undefined ? bookmark.order : index,
+                            category: bookmark.category || '未分类'
+                        }));
+                    }
+                    state.selectedBookmarks.clear();
+                    saveLocal();
+                    renderCategories();
+                    renderBookmarks();
+
+                    hideLoginOverlay();
+                    showToast('登录成功，已加载最新数据', 2000);
                 } finally {
                     elements.loginSubmitBtn.disabled = false;
                 }

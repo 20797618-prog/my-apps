@@ -1,0 +1,8 @@
+# Cloudflare wrangler 本地缓存
+.wrangler/
+
+# Node 依赖（如有）
+node_modules/
+
+# 系统文件
+.DS_Store
