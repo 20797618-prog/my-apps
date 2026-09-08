@@ -1,5 +1,6 @@
-// 简约网站导航 · 多用户共享库（functions 目录下划线前缀文件不生成路由）
-// 功能：CORS / JSON 响应 / base64 / 每用户密钥派生 / AES-GCM / 会话与验证码工具
+// 简约网站导航 · 共享库（functions 目录下划线前缀文件不生成路由）
+// 职责：CORS/JSON/base64、AES-GCM 每用户密钥派生、会话与验证码工具、PBKDF2 密码哈希
+// 账号相关键（user/session/code/sent/pwfail）统一存 ACCOUNTS_KV（中央账号库，供未来多应用复用）
 
 export function corsHeaders() {
     return {
@@ -57,7 +58,7 @@ export function normEmail(email) {
     return typeof email === 'string' ? email.trim().toLowerCase() : '';
 }
 
-// 由主密钥 ENC_KEY + 用户邮箱派生每用户 AES-GCM 密钥
+// ---------- 每用户书签加密密钥：主密钥 ENC_KEY + 邮箱 HKDF 派生 ----------
 async function deriveKey(env, email) {
     const master = await crypto.subtle.importKey(
         'raw',
@@ -79,7 +80,6 @@ async function deriveKey(env, email) {
     return crypto.subtle.importKey('raw', bits, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
-// 加密：密文中内嵌 email，解密时校验，防止 key 错配
 export async function encryptFor(env, email, obj) {
     const key = await deriveKey(env, email);
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -107,6 +107,7 @@ export async function decryptFor(env, email, ciphertext) {
     return parsed;
 }
 
+// ---------- 随机数与验证码 ----------
 export function randomHex(bytes) {
     const arr = crypto.getRandomValues(new Uint8Array(bytes));
     return [...arr].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -116,13 +117,53 @@ export function randomCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-// 从 Authorization: Bearer <token> 解析会话，返回 { token, email } 或 null
+// ---------- PBKDF2 密码哈希（6 位数字专用，加盐防彩虹表） ----------
+// 注意：workerd 上限 100000 次迭代
+const PBKDF2_ITER = 100000;
+
+function bufToB64(buf) {
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+}
+
+export async function hashPassword(password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+    const hash = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', hash: 'SHA-256', salt, iterations: PBKDF2_ITER },
+        key,
+        256
+    );
+    return { s: bufToB64(salt), h: bufToB64(hash), i: PBKDF2_ITER };
+}
+
+export async function verifyPassword(password, record) {
+    if (!record || !record.s || !record.h) return false;
+    const salt = b64ToBytes(record.s);
+    const iterations = record.i || PBKDF2_ITER;
+    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+    const hash = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', hash: 'SHA-256', salt, iterations },
+        key,
+        256
+    );
+    return safeEqual(bufToB64(hash), record.h);
+}
+
+export function validPassword(pwd) {
+    return typeof pwd === 'string' && /^\d{6}$/.test(pwd);
+}
+
+// ---------- 会话 ----------
+// 从 Authorization: Bearer <token> 解析会话（读中央账号库 ACCOUNTS_KV）
 export async function resolveSession(request, env) {
     const auth = request.headers.get('Authorization') || '';
     const m = auth.match(/^Bearer\s+([A-Za-z0-9]+)$/);
     if (!m) return null;
     const token = m[1];
-    const raw = await env.BOOKMARKS_KV.get('session:' + token);
+    const raw = await env.ACCOUNTS_KV.get('session:' + token);
     if (!raw) return null;
     try {
         const sess = JSON.parse(raw);
@@ -136,3 +177,5 @@ export async function resolveSession(request, env) {
 export const SESSION_TTL = 60 * 60 * 24 * 30;   // 30 天
 export const CODE_TTL = 10 * 60;                 // 验证码 10 分钟
 export const RATE_TTL = 60;                      // 重发间隔 60 秒
+export const PWD_LOCK_MAX = 5;                   // 密码连续错误上限
+export const PWD_LOCK_TTL = 15 * 60;             // 锁定 15 分钟

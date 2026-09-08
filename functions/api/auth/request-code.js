@@ -15,14 +15,14 @@ export async function onRequest(context) {
         }
 
         // 限流：同一邮箱 60 秒内只能发一次
-        const last = await env.BOOKMARKS_KV.get('sent:' + email);
+        const last = await env.ACCOUNTS_KV.get('sent:' + email);
         if (last) {
             return json({ error: 'rate_limited', message: '发送太频繁，请 60 秒后再试' }, 429);
         }
 
         const code = randomCode();
-        await env.BOOKMARKS_KV.put('code:' + email, code, { expirationTtl: CODE_TTL });
-        await env.BOOKMARKS_KV.put('sent:' + email, '1', { expirationTtl: RATE_TTL });
+        await env.ACCOUNTS_KV.put('code:' + email, code, { expirationTtl: CODE_TTL });
+        await env.ACCOUNTS_KV.put('sent:' + email, '1', { expirationTtl: RATE_TTL });
 
         const mailEnabled = env.MAIL_ENABLED === 'true' && !!(env.MAIL_PASS && env.MAIL_USER);
 
@@ -32,7 +32,7 @@ export async function onRequest(context) {
                 return json({ ok: true, dev: false });
             } catch (e) {
                 // 发送失败：清除限流标记，允许重试
-                await env.BOOKMARKS_KV.delete('sent:' + email);
+                await env.ACCOUNTS_KV.delete('sent:' + email);
                 console.error('send mail failed', String(e));
                 const detail = String(e && e.message ? e.message : e).slice(0, 160);
                 return json({ error: 'mail_failed', message: '邮件发送失败，请稍后重试或检查邮箱', detail }, 500);

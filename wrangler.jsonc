@@ -6,6 +6,10 @@
     {
       "binding": "BOOKMARKS_KV",
       "id": "5a54facfd83d405ca359f484635ef4f9"
+    },
+    {
+      "binding": "ACCOUNTS_KV",
+      "id": "e8d41d4739e94a80b3f566fc0d549e96"
     }
   ]
 }

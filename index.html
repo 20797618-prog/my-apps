@@ -668,25 +668,68 @@
             text-decoration: underline;
         }
 
-        .login-intro {
-            font-family: Georgia, 'Songti SC', serif;
-            text-align: center;
-            padding: 6px 8px 18px;
+        /* 登录方式切换标签 */
+        .auth-tabs {
+            display: flex;
+            gap: 6px;
             margin-bottom: 18px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .login-intro .login-quote-mark {
-            font-size: 26px;
-            line-height: 1;
-            color: var(--primary-color);
-            margin-bottom: 6px;
-            opacity: 0.7;
+        .auth-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 0 9px;
+            font-size: 14px;
+            color: var(--muted-color);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            font-family: inherit;
+            transition: color 0.2s, border-color 0.2s;
         }
 
-        .login-intro .login-quote {
-            font-size: 13px;
-            line-height: 2;
+        .auth-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .auth-tab:hover {
+            color: var(--primary-color);
+        }
+
+        #authPanelPwd {
+            display: none;
+        }
+
+        /* 主页顶部说明引言条 */
+        .site-intro {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 0 0 22px;
+        }
+
+        .site-intro .site-intro-mark {
+            font-family: Georgia, 'Songti SC', serif;
+            font-size: 34px;
+            line-height: 1;
+            color: var(--primary-color);
+            opacity: 0.85;
+            margin-top: -3px;
+        }
+
+        .site-intro .site-intro-text {
+            font-family: Georgia, 'Songti SC', serif;
+            font-size: 15px;
+            line-height: 1.9;
             color: var(--text-color);
             margin: 0;
         }
@@ -777,38 +820,76 @@
 <body>
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
-            <div class="login-intro">
-                <div class="login-quote-mark">&ldquo;</div>
-                <p class="login-quote">我经常要打开很多一样的网站，<br>浏览器有书签功能，<br>可收藏多了，反而不容易找。<br>于是做了这个网站给自己用，<br>也希望能帮到你。</p>
+            <div class="auth-tabs" role="tablist">
+                <button type="button" class="auth-tab active" data-auth="code" role="tab">验证码登录</button>
+                <button type="button" class="auth-tab" data-auth="pwd" role="tab">密码登录</button>
             </div>
-            <div id="loginStepEmail">
-                <h2>邮箱登录</h2>
-                <p>输入邮箱，验证码会发送到你的邮箱</p>
-                <form id="emailForm">
+            <div id="authPanelCode">
+                <div id="loginStepEmail">
+                    <h2>邮箱登录</h2>
+                    <p>输入邮箱，验证码会发送到你的邮箱</p>
+                    <form id="emailForm">
+                        <div class="form-group">
+                            <input type="email" id="emailInput" class="form-control" placeholder="请输入邮箱" autocomplete="email" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="sendCodeBtn">
+                            <i class="fas fa-paper-plane"></i>发送验证码
+                        </button>
+                    </form>
+                </div>
+                <div id="loginStepCode" style="display: none;">
+                    <h2>输入验证码</h2>
+                    <p id="codeSentTo">验证码已发送</p>
+                    <form id="codeForm">
+                        <div class="form-group">
+                            <input type="text" id="codeInput" class="form-control" placeholder="6 位验证码" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="verifyLoginBtn">
+                            <i class="fas fa-unlock"></i>登录并同步数据
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-link login-back" id="loginBackBtn">
+                        <i class="fas fa-arrow-left"></i>更换邮箱 / 重新发送
+                    </button>
+                </div>
+            </div>
+            <div id="authPanelPwd">
+                <h2>密码登录</h2>
+                <p>使用已设置的 6 位数字密码登录</p>
+                <form id="pwdLoginForm">
                     <div class="form-group">
-                        <input type="email" id="emailInput" class="form-control" placeholder="请输入邮箱" autocomplete="email" required>
+                        <input type="email" id="pwdEmailInput" class="form-control" placeholder="请输入邮箱" autocomplete="email" required>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="sendCodeBtn">
-                        <i class="fas fa-paper-plane"></i>发送验证码
+                    <div class="form-group">
+                        <input type="password" id="pwdInput" class="form-control" placeholder="6 位数字密码" inputmode="numeric" maxlength="6" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="pwdLoginBtn">
+                        <i class="fas fa-lock"></i>登录
                     </button>
                 </form>
-            </div>
-            <div id="loginStepCode" style="display: none;">
-                <h2>输入验证码</h2>
-                <p id="codeSentTo">验证码已发送</p>
-                <form id="codeForm">
-                    <div class="form-group">
-                        <input type="text" id="codeInput" class="form-control" placeholder="6 位验证码" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="verifyLoginBtn">
-                        <i class="fas fa-unlock"></i>登录并同步数据
-                    </button>
-                </form>
-                <button type="button" class="btn btn-link login-back" id="loginBackBtn">
-                    <i class="fas fa-arrow-left"></i>更换邮箱 / 重新发送
+                <button type="button" class="btn btn-link login-back" id="forgotPwdBtn">
+                    <i class="fas fa-envelope"></i>忘记密码？用验证码登录
                 </button>
             </div>
             <p class="login-footnote" id="loginHint"></p>
+        </div>
+    </div>
+
+    <!-- 设置/修改密码弹窗 -->
+    <div class="login-overlay" id="setPwdModal">
+        <div class="login-card" style="max-width: 360px;">
+            <h2>设置登录密码</h2>
+            <p>设置 6 位数字密码后，换设备可用密码直接登录，不用等验证码邮件。忘记密码随时可用验证码登录后重设。</p>
+            <div class="form-group">
+                <input type="password" id="pwdNewInput" class="form-control" placeholder="6 位数字新密码" inputmode="numeric" maxlength="6" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <input type="password" id="pwdNew2Input" class="form-control" placeholder="再次输入确认" inputmode="numeric" maxlength="6" autocomplete="new-password">
+            </div>
+            <button type="button" class="btn btn-primary" id="pwdSaveBtn" style="width: 100%; justify-content: center;">
+                <i class="fas fa-check"></i>保存密码
+            </button>
+            <button type="button" class="btn btn-link login-back" id="pwdModalCancel">取消</button>
         </div>
     </div>
 
@@ -841,11 +922,19 @@
             <span class="user-badge" id="userBadge" style="display: none;">
                 <i class="fas fa-user-circle"></i>
                 <span id="userEmailLabel"></span>
+                <button type="button" class="btn-logout" id="setPwdBtn" title="设置/修改密码" style="font-size: 13px; padding: 0 2px;">
+                    <i class="fas fa-key"></i>
+                </button>
                 <button type="button" class="btn-logout" id="logoutBtn" title="退出登录">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </span>
         </div>
+    </div>
+
+    <div class="site-intro">
+        <span class="site-intro-mark">&ldquo;</span>
+        <p class="site-intro-text">我经常要打开很多一样的网站，浏览器有书签功能，可收藏多了反而不容易找，于是做了这个网站给自己用，也希望能帮到你。</p>
     </div>
 
     <div class="selection-bar" id="selectionBar">
@@ -946,6 +1035,8 @@
         let sessionToken = localStorage.getItem('nav_token') || null;
         // 当前登录邮箱
         let currentUser = null;
+        // 当前用户是否已设置 6 位数字密码
+        let currentUserHasPwd = false;
         // 等待验证码的邮箱
         let pendingEmail = null;
 
@@ -1007,7 +1098,21 @@
             loginHint: document.getElementById('loginHint'),
             userBadge: document.getElementById('userBadge'),
             userEmailLabel: document.getElementById('userEmailLabel'),
-            logoutBtn: document.getElementById('logoutBtn')
+            logoutBtn: document.getElementById('logoutBtn'),
+            setPwdBtn: document.getElementById('setPwdBtn'),
+            authTabs: document.querySelectorAll('.auth-tab'),
+            authPanelCode: document.getElementById('authPanelCode'),
+            authPanelPwd: document.getElementById('authPanelPwd'),
+            pwdLoginForm: document.getElementById('pwdLoginForm'),
+            pwdEmailInput: document.getElementById('pwdEmailInput'),
+            pwdInput: document.getElementById('pwdInput'),
+            pwdLoginBtn: document.getElementById('pwdLoginBtn'),
+            forgotPwdBtn: document.getElementById('forgotPwdBtn'),
+            setPwdModal: document.getElementById('setPwdModal'),
+            pwdNewInput: document.getElementById('pwdNewInput'),
+            pwdNew2Input: document.getElementById('pwdNew2Input'),
+            pwdSaveBtn: document.getElementById('pwdSaveBtn'),
+            pwdModalCancel: document.getElementById('pwdModalCancel')
         };
 
         // 工具函数：显示提示消息
@@ -1050,6 +1155,7 @@
                 const data = await res.json();
                 currentUser = data.user ? data.user.email : null;
                 if (!currentUser) throw new Error('no user');
+                currentUserHasPwd = !!(data.user && data.user.hasPassword);
                 await enterApp();
             } catch (e) {
                 clearSession();
@@ -1105,8 +1211,7 @@
         }
 
         function showLoginOverlay() {
-            showLoginStep(1);
-            elements.loginHint.textContent = '';
+            showAuthMode('code');
             document.body.classList.add('app-locked');
             elements.loginOverlay.classList.add('active');
             setTimeout(() => elements.emailInput.focus(), 0);
@@ -1128,6 +1233,45 @@
             elements.loginOverlay.classList.remove('active');
         }
 
+        // 登录方式切换：code=验证码登录 / pwd=密码登录
+        function showAuthMode(mode) {
+            elements.authTabs.forEach(tab => {
+                const active = tab.getAttribute('data-auth') === mode;
+                tab.classList.toggle('active', active);
+            });
+            elements.loginHint.textContent = '';
+            if (mode === 'pwd') {
+                elements.authPanelCode.style.display = 'none';
+                elements.authPanelPwd.style.display = 'block';
+                setTimeout(() => elements.pwdEmailInput.focus(), 0);
+            } else {
+                elements.authPanelPwd.style.display = 'none';
+                elements.authPanelCode.style.display = 'block';
+                showLoginStep(1);
+                setTimeout(() => elements.emailInput.focus(), 0);
+            }
+        }
+
+        // 打开设置/修改密码弹窗
+        function openSetPwdModal() {
+            elements.setPwdModal.classList.add('active');
+            elements.pwdNewInput.value = '';
+            elements.pwdNew2Input.value = '';
+            setTimeout(() => elements.pwdNewInput.focus(), 0);
+        }
+
+        function closeSetPwdModal() {
+            elements.setPwdModal.classList.remove('active');
+        }
+
+        // 刷新密码按钮状态：未设密码时高亮提示（建议设置），已设置则显示修改
+        function updatePwdUI() {
+            if (!elements.setPwdBtn) return;
+            const hasPwd = currentUserHasPwd && !!currentUser;
+            elements.setPwdBtn.title = hasPwd ? '修改密码' : '设置密码';
+            elements.setPwdBtn.style.color = hasPwd ? '' : 'var(--warning-color)';
+        }
+
         function setUserBar() {
             if (currentUser) {
                 elements.userEmailLabel.textContent = currentUser;
@@ -1135,11 +1279,13 @@
             } else {
                 elements.userBadge.style.display = 'none';
             }
+            updatePwdUI();
         }
 
         function clearSession() {
             sessionToken = null;
             currentUser = null;
+            currentUserHasPwd = false;
             pendingEmail = null;
             localStorage.removeItem('nav_token');
             localStorage.removeItem('nav_email');
@@ -1147,6 +1293,7 @@
 
         function logout() {
             clearSession();
+            closeSetPwdModal();
             state.bookmarks = [];
             state.selectedBookmarks.clear();
             saveLocal();
@@ -1327,11 +1474,16 @@
 
                     sessionToken = data.token;
                     currentUser = data.email || pendingEmail;
+                    currentUserHasPwd = !!data.hasPassword;
                     localStorage.setItem('nav_token', data.token);
                     localStorage.setItem('nav_email', currentUser);
 
                     await enterApp();
-                    showToast(data.isNewUser ? '注册成功，欢迎使用！' : '登录成功，已加载最新数据', 2200);
+                    showToast(data.isNewUser ? '注册成功，欢迎使用！' : '登录成功，已加载最新数据', 1800);
+                    if (!currentUserHasPwd) {
+                        // 尚未设置密码：引导设置，方便换设备直接密码登录
+                        setTimeout(openSetPwdModal, 900);
+                    }
                 } catch (error) {
                     elements.loginHint.textContent = error.message === '登录已过期' ? '' : '网络错误，请重试';
                 } finally {
@@ -1346,6 +1498,136 @@
                 elements.loginHint.textContent = '';
                 showLoginStep(1);
                 setTimeout(() => elements.emailInput.focus(), 0);
+            });
+
+            // 登录方式切换：验证码 / 密码
+            elements.authTabs.forEach(tab => {
+                tab.addEventListener('click', () => showAuthMode(tab.getAttribute('data-auth')));
+            });
+
+            // 忘记密码 -> 切回验证码登录
+            elements.forgotPwdBtn.addEventListener('click', () => {
+                elements.loginHint.textContent = '请用验证码登录，登录后可重新设置密码';
+                showAuthMode('code');
+            });
+
+            // 密码登录提交
+            elements.pwdLoginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = elements.pwdEmailInput.value.trim().toLowerCase();
+                const pwd = elements.pwdInput.value.trim();
+                if (!email) {
+                    elements.loginHint.textContent = '请输入邮箱';
+                    return;
+                }
+                if (!/^\d{6}$/.test(pwd)) {
+                    elements.loginHint.textContent = '密码为 6 位数字';
+                    return;
+                }
+
+                elements.pwdLoginBtn.disabled = true;
+                elements.loginHint.textContent = '';
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/login-password`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password: pwd })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (res.status === 401) {
+                        elements.loginHint.textContent = data.message || '密码错误';
+                        elements.pwdInput.value = '';
+                        elements.pwdInput.focus();
+                        return;
+                    }
+                    if (res.status === 429) {
+                        elements.loginHint.textContent = data.message || '尝试次数过多，请稍后再试';
+                        return;
+                    }
+                    if (!res.ok) {
+                        if (data.error === 'no_password' || data.error === 'user_not_found') {
+                            elements.loginHint.textContent = data.message || '请先用验证码登录';
+                            setTimeout(() => showAuthMode('code'), 800);
+                            return;
+                        }
+                        elements.loginHint.textContent = data.message || '登录失败，请重试';
+                        return;
+                    }
+
+                    sessionToken = data.token;
+                    currentUser = data.email || email;
+                    currentUserHasPwd = true;
+                    localStorage.setItem('nav_token', data.token);
+                    localStorage.setItem('nav_email', currentUser);
+
+                    elements.pwdInput.value = '';
+                    await enterApp();
+                    showToast('登录成功，已加载最新数据', 1800);
+                } catch (error) {
+                    elements.loginHint.textContent = '网络错误，请重试';
+                } finally {
+                    elements.pwdLoginBtn.disabled = false;
+                }
+            });
+
+            // 顶栏「设置/修改密码」
+            elements.setPwdBtn.addEventListener('click', openSetPwdModal);
+
+            // 保存密码
+            elements.pwdSaveBtn.addEventListener('click', async () => {
+                const p1 = elements.pwdNewInput.value.trim();
+                const p2 = elements.pwdNew2Input.value.trim();
+                if (!/^\d{6}$/.test(p1)) {
+                    showToast('密码需为 6 位数字', 2200);
+                    elements.pwdNewInput.focus();
+                    return;
+                }
+                if (p1 !== p2) {
+                    showToast('两次输入的密码不一致', 2200);
+                    elements.pwdNew2Input.focus();
+                    return;
+                }
+                elements.pwdSaveBtn.disabled = true;
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/set-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + sessionToken
+                        },
+                        body: JSON.stringify({ password: p1 })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        if (res.status === 401) {
+                            clearSession();
+                            closeSetPwdModal();
+                            showLoginOverlay();
+                            showToast('登录已过期，请重新登录', 2200);
+                            return;
+                        }
+                        showToast(data.message || '保存失败，请重试', 2400);
+                        return;
+                    }
+                    currentUserHasPwd = true;
+                    closeSetPwdModal();
+                    updatePwdUI();
+                    showToast('密码已保存，之后可用密码登录', 2400);
+                } catch (e) {
+                    showToast('网络错误，请重试', 2200);
+                } finally {
+                    elements.pwdSaveBtn.disabled = false;
+                }
+            });
+
+            // 密码弹窗取消/点遮罩关闭
+            elements.pwdModalCancel.addEventListener('click', closeSetPwdModal);
+            elements.setPwdModal.addEventListener('click', (e) => {
+                if (e.target === elements.setPwdModal) closeSetPwdModal();
+            });
+            // 回车保存
+            elements.pwdNew2Input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') elements.pwdSaveBtn.click();
             });
 
             // 退出登录
@@ -1389,6 +1671,9 @@
                     closeModal();
                     if (elements.urlsList.classList.contains('show')) {
                         elements.urlsList.classList.remove('show');
+                    }
+                    if (elements.setPwdModal.classList.contains('active')) {
+                        closeSetPwdModal();
                     }
                 }
             });

@@ -9,10 +9,13 @@ export async function onRequest(context) {
     const sess = await resolveSession(request, env);
     if (!sess) return json({ error: 'unauthorized' }, 401);
 
-    const raw = await env.BOOKMARKS_KV.get('user:' + sess.email);
-    let user = { email: sess.email };
+    const raw = await env.ACCOUNTS_KV.get('user:' + sess.email);
+    let user = { email: sess.email, hasPassword: false };
     if (raw) {
-        try { user = JSON.parse(raw); } catch (e) {}
+        try {
+            const u = JSON.parse(raw);
+            user = Object.assign({}, u, { email: u.email || sess.email, hasPassword: !!(u.pwd && u.pwd.h) });
+        } catch (e) {}
     }
     return json({ ok: true, user });
 }
