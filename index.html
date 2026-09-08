@@ -652,6 +652,85 @@
             justify-content: center;
         }
 
+        .login-card .login-back {
+            width: 100%;
+            margin-top: 10px;
+            background: none;
+            border: none;
+            color: var(--muted-color);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .login-card .login-back:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .login-intro {
+            font-family: Georgia, 'Songti SC', serif;
+            text-align: center;
+            padding: 6px 8px 18px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .login-intro .login-quote-mark {
+            font-size: 26px;
+            line-height: 1;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+
+        .login-intro .login-quote {
+            font-size: 13px;
+            line-height: 2;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .login-card .login-footnote {
+            font-size: 12px;
+            color: var(--muted-color);
+            text-align: center;
+            margin: 12px 0 0;
+            min-height: 18px;
+        }
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 4px 8px 4px 12px;
+            font-size: 13px;
+            color: var(--text-color);
+            white-space: nowrap;
+            max-width: 220px;
+        }
+
+        .user-badge #userEmailLabel {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-badge .btn-logout {
+            background: none;
+            border: none;
+            color: var(--muted-color);
+            cursor: pointer;
+            padding: 2px 4px;
+            font-size: 13px;
+        }
+
+        .user-badge .btn-logout:hover {
+            color: var(--danger-color);
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -698,16 +777,38 @@
 <body>
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
-            <h2>请输入访问口令</h2>
-            <p>登录后自动同步云端最新书签</p>
-            <form id="loginForm">
-                <div class="form-group">
-                    <input type="password" id="passphraseInput" class="form-control" placeholder="请输入口令" autocomplete="off" required>
-                </div>
-                <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
-                    <i class="fas fa-unlock"></i>登录并同步数据
+            <div class="login-intro">
+                <div class="login-quote-mark">&ldquo;</div>
+                <p class="login-quote">我经常要打开很多一样的网站，<br>浏览器有书签功能，<br>可收藏多了，反而不容易找。<br>于是做了这个网站给自己用，<br>也希望能帮到你。</p>
+            </div>
+            <div id="loginStepEmail">
+                <h2>邮箱登录</h2>
+                <p>输入邮箱，验证码会发送到你的邮箱</p>
+                <form id="emailForm">
+                    <div class="form-group">
+                        <input type="email" id="emailInput" class="form-control" placeholder="请输入邮箱" autocomplete="email" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="sendCodeBtn">
+                        <i class="fas fa-paper-plane"></i>发送验证码
+                    </button>
+                </form>
+            </div>
+            <div id="loginStepCode" style="display: none;">
+                <h2>输入验证码</h2>
+                <p id="codeSentTo">验证码已发送</p>
+                <form id="codeForm">
+                    <div class="form-group">
+                        <input type="text" id="codeInput" class="form-control" placeholder="6 位验证码" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="verifyLoginBtn">
+                        <i class="fas fa-unlock"></i>登录并同步数据
+                    </button>
+                </form>
+                <button type="button" class="btn btn-link login-back" id="loginBackBtn">
+                    <i class="fas fa-arrow-left"></i>更换邮箱 / 重新发送
                 </button>
-            </form>
+            </div>
+            <p class="login-footnote" id="loginHint"></p>
         </div>
     </div>
 
@@ -737,6 +838,13 @@
             <div class="theme-toggle" id="themeToggle">
                 <i class="fas fa-sun"></i>
             </div>
+            <span class="user-badge" id="userBadge" style="display: none;">
+                <i class="fas fa-user-circle"></i>
+                <span id="userEmailLabel"></span>
+                <button type="button" class="btn-logout" id="logoutBtn" title="退出登录">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </span>
         </div>
     </div>
 
@@ -834,14 +942,12 @@
     <script>
         // 云端数据 API 地址（与站点同源，走 Cloudflare Pages Functions，避免跨域/域名拦截）
         const API_BASE_URL = '';
-        // 登录成功后保存的口令哈希，用于鉴权请求
-        let authToken = null;
-
-        // 计算 sha256 十六进制摘要
-        async function sha256Hex(text) {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-            return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        // 登录后的会话 token（localStorage 持久化，30 天有效）
+        let sessionToken = localStorage.getItem('nav_token') || null;
+        // 当前登录邮箱
+        let currentUser = null;
+        // 等待验证码的邮箱
+        let pendingEmail = null;
 
         // 应用程序状态
         const state = {
@@ -888,9 +994,20 @@
             importBtn: document.getElementById('importBtn'),
             importFileInput: document.getElementById('importFileInput'),
             loginOverlay: document.getElementById('loginOverlay'),
-            loginForm: document.getElementById('loginForm'),
-            passphraseInput: document.getElementById('passphraseInput'),
-            loginSubmitBtn: document.getElementById('loginSubmitBtn')
+            loginStepEmail: document.getElementById('loginStepEmail'),
+            loginStepCode: document.getElementById('loginStepCode'),
+            emailForm: document.getElementById('emailForm'),
+            emailInput: document.getElementById('emailInput'),
+            sendCodeBtn: document.getElementById('sendCodeBtn'),
+            codeSentTo: document.getElementById('codeSentTo'),
+            codeForm: document.getElementById('codeForm'),
+            codeInput: document.getElementById('codeInput'),
+            verifyLoginBtn: document.getElementById('verifyLoginBtn'),
+            loginBackBtn: document.getElementById('loginBackBtn'),
+            loginHint: document.getElementById('loginHint'),
+            userBadge: document.getElementById('userBadge'),
+            userEmailLabel: document.getElementById('userEmailLabel'),
+            logoutBtn: document.getElementById('logoutBtn')
         };
 
         // 工具函数：显示提示消息
@@ -911,19 +1028,132 @@
             initSortable();
             renderCategories();
             renderBookmarks();
-            showLoginOverlay();
+            boot();
         });
 
+        function boot() {
+            if (sessionToken) {
+                validateSession();
+            } else {
+                showLoginOverlay();
+            }
+        }
+
+        // 校验本地会话：有效则直接进入，无效则回登录
+        async function validateSession() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    headers: { 'Authorization': 'Bearer ' + sessionToken },
+                    cache: 'no-store'
+                });
+                if (!res.ok) throw new Error('session invalid');
+                const data = await res.json();
+                currentUser = data.user ? data.user.email : null;
+                if (!currentUser) throw new Error('no user');
+                await enterApp();
+            } catch (e) {
+                clearSession();
+                showLoginOverlay();
+                showToast('登录已过期，请重新登录', 2200);
+            }
+        }
+
+        // 进入应用：拉取云端最新书签并解锁
+        async function enterApp() {
+            try {
+                const data = await apiFetchJson('/api/bookmarks');
+                if (data && Array.isArray(data.bookmarks)) {
+                    state.bookmarks = data.bookmarks.map((bookmark, index) => ({
+                        ...bookmark,
+                        order: bookmark.order !== undefined ? bookmark.order : index,
+                        category: bookmark.category || '未分类'
+                    }));
+                }
+            } catch (e) {
+                console.warn('拉取云端书签失败，暂用本地缓存', e);
+            }
+            state.selectedBookmarks.clear();
+            saveLocal();
+            renderCategories();
+            renderBookmarks();
+            setUserBar();
+            hideLoginOverlay();
+        }
+
+        // 统一请求封装（自动附带会话 token，401 时抛出登录过期错误）
+        async function apiFetchJson(path, options = {}) {
+            const headers = Object.assign({}, options.headers || {});
+            if (sessionToken) headers['Authorization'] = 'Bearer ' + sessionToken;
+            if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+            const res = await fetch(API_BASE_URL + path, Object.assign({}, options, { headers }));
+            if (res.status === 401) {
+                const err = new Error('登录已过期');
+                err.status = 401;
+                throw err;
+            }
+            if (!res.ok) {
+                let msg = '请求失败';
+                try {
+                    const d = await res.json();
+                    if (d && d.message) msg = d.message;
+                } catch (e) {}
+                const err = new Error(msg);
+                err.status = res.status;
+                throw err;
+            }
+            return res.json();
+        }
+
         function showLoginOverlay() {
+            showLoginStep(1);
+            elements.loginHint.textContent = '';
             document.body.classList.add('app-locked');
             elements.loginOverlay.classList.add('active');
-            elements.passphraseInput.value = '';
-            setTimeout(() => elements.passphraseInput.focus(), 0);
+            setTimeout(() => elements.emailInput.focus(), 0);
+        }
+
+        function showLoginStep(step) {
+            if (step === 2) {
+                elements.loginStepEmail.style.display = 'none';
+                elements.loginStepCode.style.display = 'block';
+                setTimeout(() => elements.codeInput.focus(), 0);
+            } else {
+                elements.loginStepCode.style.display = 'none';
+                elements.loginStepEmail.style.display = 'block';
+            }
         }
 
         function hideLoginOverlay() {
             document.body.classList.remove('app-locked');
             elements.loginOverlay.classList.remove('active');
+        }
+
+        function setUserBar() {
+            if (currentUser) {
+                elements.userEmailLabel.textContent = currentUser;
+                elements.userBadge.style.display = 'inline-flex';
+            } else {
+                elements.userBadge.style.display = 'none';
+            }
+        }
+
+        function clearSession() {
+            sessionToken = null;
+            currentUser = null;
+            pendingEmail = null;
+            localStorage.removeItem('nav_token');
+            localStorage.removeItem('nav_email');
+        }
+
+        function logout() {
+            clearSession();
+            state.bookmarks = [];
+            state.selectedBookmarks.clear();
+            saveLocal();
+            renderCategories();
+            renderBookmarks();
+            showLoginOverlay();
+            showToast('已退出登录', 1800);
         }
 
         // 初始化主题
@@ -941,90 +1171,15 @@
             });
         }
 
-        // 加载书签数据
+        // 加载本地缓存书签（无缓存时为空，数据以云端为准）
         function loadBookmarks() {
             const savedBookmarks = localStorage.getItem('bookmarkDashboard');
             if (savedBookmarks) {
                 state.bookmarks = JSON.parse(savedBookmarks);
             } else {
-                // 默认示例书签
-                state.bookmarks = [
-                    {
-                        id: '1',
-                        name: 'GitHub',
-                        url: 'https://github.com',
-                        category: '开发工具',
-                        tags: ['代码托管', '版本控制'],
-                        icon: 'https://github.githubassets.com/favicons/favicon.png',
-                        order: 1
-                    },
-                    {
-                        id: '2',
-                        name: 'Stack Overflow',
-                        url: 'https://stackoverflow.com',
-                        category: '开发工具',
-                        tags: ['问答', '编程'],
-                        icon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico',
-                        order: 2
-                    },
-                    {
-                        id: '3',
-                        name: 'ChatGPT',
-                        url: 'https://chat.openai.com',
-                        category: 'AI工具',
-                        tags: ['人工智能', '聊天'],
-                        icon: 'https://chat.openai.com/favicon.ico',
-                        order: 3
-                    },
-                    {
-                        id: '4',
-                        name: 'MDN Web Docs',
-                        url: 'https://developer.mozilla.org',
-                        category: '开发工具',
-                        tags: ['文档', 'Web开发'],
-                        icon: 'https://developer.mozilla.org/favicon.ico',
-                        order: 4
-                    },
-                    {
-                        id: '5',
-                        name: 'Figma',
-                        url: 'https://figma.com',
-                        category: '设计工具',
-                        tags: ['设计', 'UI/UX'],
-                        icon: 'https://static.figma.com/app/icon/1/touch-180.png',
-                        order: 5
-                    },
-                    {
-                        id: '6',
-                        name: 'Notion',
-                        url: 'https://notion.so',
-                        category: '生产力',
-                        tags: ['笔记', '项目管理'],
-                        icon: 'https://www.notion.so/images/favicon.ico',
-                        order: 6
-                    },
-                    {
-                        id: '7',
-                        name: 'YouTube',
-                        url: 'https://youtube.com',
-                        category: '媒体',
-                        tags: ['视频', '娱乐'],
-                        icon: 'https://www.youtube.com/favicon.ico',
-                        order: 7
-                    },
-                    {
-                        id: '8',
-                        name: 'Google',
-                        url: 'https://google.com',
-                        category: '搜索',
-                        tags: ['搜索引擎', '工具'],
-                        icon: 'https://www.google.com/favicon.ico',
-                        order: 8
-                    }
-                ];
-                saveBookmarks();
+                state.bookmarks = [];
             }
-            
+
             // 如果没有分类，设置默认分类
             if (!state.bookmarks.some(b => b.category)) {
                 state.bookmarks.forEach(bookmark => {
@@ -1043,7 +1198,7 @@
         // 防抖自动保存到云端（登录后生效，增删改/拖拽/导入都会触发）
         let cloudSaveTimer = null;
         function saveToCloud() {
-            if (!authToken) return;
+            if (!sessionToken) return;
             clearTimeout(cloudSaveTimer);
             cloudSaveTimer = setTimeout(async () => {
                 try {
@@ -1051,10 +1206,16 @@
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Auth-Token': authToken
+                            'Authorization': 'Bearer ' + sessionToken
                         },
                         body: JSON.stringify({ bookmarks: state.bookmarks })
                     });
+                    if (response.status === 401) {
+                        clearSession();
+                        showLoginOverlay();
+                        showToast('登录已过期，请重新登录', 2200);
+                        return;
+                    }
                     if (!response.ok) {
                         showToast('云端保存失败，请检查网络', 2500);
                     }
@@ -1094,64 +1255,101 @@
             // 文件选择变化事件（导入）
             elements.importFileInput.addEventListener('change', handleFileImport);
 
-            // 登录事件：输入口令 -> 云端校验 -> 拉取最新数据
-            elements.loginForm.addEventListener('submit', async (e) => {
+            // 登录步骤一：提交邮箱 -> 请求发送验证码
+            elements.emailForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const passphrase = elements.passphraseInput.value.trim();
-                if (!passphrase) {
+                const email = elements.emailInput.value.trim().toLowerCase();
+                if (!email) return;
+
+                elements.sendCodeBtn.disabled = true;
+                elements.loginHint.textContent = '';
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/request-code`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (res.status === 429) {
+                        elements.loginHint.textContent = data.message || '发送太频繁，请稍后再试';
+                        return;
+                    }
+                    if (!res.ok) {
+                        elements.loginHint.textContent = data.message || '发送失败，请重试';
+                        return;
+                    }
+                    pendingEmail = email;
+                    if (data.dev && data.code) {
+                        // 开发模式（邮件未配置）：自动填入验证码
+                        elements.codeInput.value = data.code;
+                        elements.loginHint.textContent = '开发模式：验证码已自动填入';
+                    } else {
+                        elements.codeInput.value = '';
+                        elements.loginHint.textContent = '';
+                    }
+                    elements.codeSentTo.textContent = '验证码已发送至 ' + email;
+                    showLoginStep(2);
+                } catch (error) {
+                    elements.loginHint.textContent = '网络错误，请检查连接后重试';
+                } finally {
+                    elements.sendCodeBtn.disabled = false;
+                }
+            });
+
+            // 登录步骤二：提交验证码 -> 签发会话并进入
+            elements.codeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = elements.codeInput.value.trim();
+                if (!pendingEmail || !/^\d{6}$/.test(code)) {
+                    elements.loginHint.textContent = '请输入 6 位验证码';
                     return;
                 }
 
-                elements.loginSubmitBtn.disabled = true;
+                elements.verifyLoginBtn.disabled = true;
+                elements.loginHint.textContent = '';
                 try {
-                    const token = await sha256Hex(passphrase);
-
-                    let response;
-                    try {
-                        response = await fetch(`${API_BASE_URL}/api/bookmarks`, {
-                            headers: { 'X-Auth-Token': token },
-                            cache: 'no-store'
-                        });
-                    } catch (error) {
-                        showToast('网络错误，请检查连接后重试', 2000);
+                    const res = await fetch(`${API_BASE_URL}/api/auth/verify-code`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: pendingEmail, code })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (res.status === 401) {
+                        elements.loginHint.textContent = '验证码错误或已过期，请重新获取';
+                        elements.codeInput.value = '';
+                        elements.codeInput.focus();
+                        return;
+                    }
+                    if (!res.ok) {
+                        elements.loginHint.textContent = data.message || '登录失败，请重试';
                         return;
                     }
 
-                    if (response.status === 401) {
-                        showToast('口令错误，请重试', 1800);
-                        elements.passphraseInput.value = '';
-                        elements.passphraseInput.focus();
-                        return;
-                    }
-                    if (!response.ok) {
-                        showToast('服务器错误，请稍后重试', 2000);
-                        return;
-                    }
+                    sessionToken = data.token;
+                    currentUser = data.email || pendingEmail;
+                    localStorage.setItem('nav_token', data.token);
+                    localStorage.setItem('nav_email', currentUser);
 
-                    const data = await response.json();
-
-                    // 登录成功，记录口令哈希用于后续自动保存
-                    authToken = token;
-
-                    // 用云端最新数据覆盖本地
-                    if (data.bookmarks && Array.isArray(data.bookmarks)) {
-                        state.bookmarks = data.bookmarks.map((bookmark, index) => ({
-                            ...bookmark,
-                            order: bookmark.order !== undefined ? bookmark.order : index,
-                            category: bookmark.category || '未分类'
-                        }));
-                    }
-                    state.selectedBookmarks.clear();
-                    saveLocal();
-                    renderCategories();
-                    renderBookmarks();
-
-                    hideLoginOverlay();
-                    showToast('登录成功，已加载最新数据', 2000);
+                    await enterApp();
+                    showToast(data.isNewUser ? '注册成功，欢迎使用！' : '登录成功，已加载最新数据', 2200);
+                } catch (error) {
+                    elements.loginHint.textContent = error.message === '登录已过期' ? '' : '网络错误，请重试';
                 } finally {
-                    elements.loginSubmitBtn.disabled = false;
+                    elements.verifyLoginBtn.disabled = false;
                 }
             });
+
+            // 返回上一步：更换邮箱 / 重新发送
+            elements.loginBackBtn.addEventListener('click', () => {
+                pendingEmail = null;
+                elements.codeInput.value = '';
+                elements.loginHint.textContent = '';
+                showLoginStep(1);
+                setTimeout(() => elements.emailInput.focus(), 0);
+            });
+
+            // 退出登录
+            elements.logoutBtn.addEventListener('click', logout);
 
             // 全选按钮
             elements.selectAllBtn.addEventListener('click', toggleSelectAll);

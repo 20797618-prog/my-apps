@@ -9,3 +9,7 @@ node_modules/
 
 # 项目记忆与本地元数据（不入库）
 .workbuddy/
+
+# 本地开发 secrets（含 SMTP 授权码等，绝不入库）
+.dev.vars
+.dev.vars.*

@@ -4,6 +4,8 @@
 .workbuddy/
 node_modules/
 .DS_Store
+.dev.vars
+.dev.vars.*
 
 # 部署配置文件（元数据，非静态资源）
 wrangler.jsonc
