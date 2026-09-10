@@ -259,17 +259,9 @@
         .group-item {
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 8px 12px;
+            gap: 2px;
             border-radius: 8px;
-            border: none;
-            background: none;
             color: var(--text-color);
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 14px;
-            text-align: left;
-            white-space: nowrap;
             overflow: hidden;
             transition: all 0.2s;
         }
@@ -285,12 +277,21 @@
 
         .group-item .group-name {
             flex: 1;
+            min-width: 0;
+            background: none;
+            border: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: 14px;
+            text-align: left;
+            padding: 9px 4px 9px 12px;
+            cursor: pointer;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .group-item .group-del {
+        .group-item .group-act {
             display: none;
             background: none;
             border: none;
@@ -299,13 +300,20 @@
             cursor: pointer;
             font-size: 12px;
             flex-shrink: 0;
+            padding: 6px;
+            border-radius: 6px;
+            line-height: 1;
         }
 
-        .group-item:hover .group-del {
-            display: block;
+        .group-item .group-del { margin-right: 6px; }
+
+        .group-item:hover .group-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .group-item .group-del:hover {
+        .group-item .group-act:hover {
             opacity: 1;
         }
 
@@ -365,6 +373,78 @@
             background-color: var(--primary-color);
             color: #fff;
             border-color: var(--primary-color);
+        }
+
+        .sub-item {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+
+        .sub-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sub-item.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .sub-item .sub-name {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+            font-size: 13px;
+            padding: 6px 4px 6px 14px;
+        }
+
+        .sub-item .sub-act {
+            display: none;
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.6;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 6px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .sub-item .sub-del { padding-right: 10px; }
+
+        .sub-item:hover .sub-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sub-item .sub-act:hover { opacity: 1; }
+
+        .rename-input {
+            flex: 1;
+            min-width: 0;
+            padding: 6px 10px;
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            background: var(--card-background);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .sub-item .rename-input {
+            flex: none;
+            width: 96px;
         }
 
         .add-sub-btn {
@@ -2246,16 +2326,29 @@
             elements.groupList.innerHTML = state.categories.groups.map(g => {
                 const isActive = g === state.currentGroup;
                 const gs = escapeHtml(g);
-                return `<button type="button" class="group-item ${isActive ? 'active' : ''}" data-group="${gs}"><span class="group-name">${gs}</span></button>`;
+                return `<div class="group-item ${isActive ? 'active' : ''}" data-group="${gs}">
+                    <button type="button" class="group-name" title="${gs}">${gs}</button>
+                    <button type="button" class="group-act group-edit" title="改名"><i class="fas fa-pen"></i></button>
+                    <button type="button" class="group-act group-del" title="删除"><i class="fas fa-trash"></i></button>
+                </div>`;
             }).join('');
 
-            elements.groupList.querySelectorAll('.group-item').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    state.currentGroup = btn.dataset.group;
+            elements.groupList.querySelectorAll('.group-item').forEach(item => {
+                const g = item.dataset.group;
+                item.querySelector('.group-name').addEventListener('click', () => {
+                    state.currentGroup = g;
                     state.currentSub = 'all';
                     renderGroups();
                     renderSubs();
                     renderBookmarks();
+                });
+                item.querySelector('.group-edit').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    renameGroup(g, item);
+                });
+                item.querySelector('.group-del').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteGroup(g);
                 });
             });
         }
@@ -2266,19 +2359,41 @@
             const items = ['all', ...subs];
             elements.subcategoriesContainer.innerHTML = items.map(s => {
                 const isActive = s === state.currentSub;
-                const name = s === 'all' ? '全部' : s;
                 const ss = escapeHtml(s);
-                const ns = escapeHtml(name);
-                return `<button type="button" class="sub-btn ${isActive ? 'active' : ''}" data-sub="${ss}">${ns}</button>`;
+                if (s === 'all') {
+                    return `<button type="button" class="sub-btn ${isActive ? 'active' : ''}" data-sub="all">全部</button>`;
+                }
+                return `<div class="sub-item ${isActive ? 'active' : ''}" data-sub="${ss}">
+                    <button type="button" class="sub-name">${ss}</button>
+                    <button type="button" class="sub-act sub-edit" title="改名"><i class="fas fa-pen"></i></button>
+                    <button type="button" class="sub-act sub-del" title="删除"><i class="fas fa-trash"></i></button>
+                </div>`;
             }).join('') + `<button type="button" class="add-sub-btn" id="addSubBtn" title="新建小类"><i class="fas fa-plus"></i></button>`;
 
-            elements.subcategoriesContainer.querySelectorAll('.sub-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    state.currentSub = btn.dataset.sub;
+            const allBtn = elements.subcategoriesContainer.querySelector('.sub-btn[data-sub="all"]');
+            if (allBtn) allBtn.addEventListener('click', () => {
+                state.currentSub = 'all';
+                renderSubs();
+                renderBookmarks();
+            });
+
+            elements.subcategoriesContainer.querySelectorAll('.sub-item').forEach(item => {
+                const s = item.dataset.sub;
+                item.querySelector('.sub-name').addEventListener('click', () => {
+                    state.currentSub = s;
                     renderSubs();
                     renderBookmarks();
                 });
+                item.querySelector('.sub-edit').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    renameSub(state.currentGroup, s, item);
+                });
+                item.querySelector('.sub-del').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteSub(state.currentGroup, s);
+                });
             });
+
             const addSubBtn = elements.subcategoriesContainer.querySelector('#addSubBtn');
             if (addSubBtn) addSubBtn.addEventListener('click', () => inlineNewSub());
         }
@@ -2309,6 +2424,125 @@
             renderSubs();
             renderBookmarks();
             saveBookmarks();
+        }
+
+        // 内联改名：把名称元素替换成输入框，回车/失焦提交，Esc 取消
+        function startInlineRename(el, value, onFinish) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            input.maxLength = 12;
+            input.className = 'rename-input';
+            el.replaceWith(input);
+            input.focus();
+            input.select();
+            let finished = false;
+            const commit = () => {
+                if (finished) return;
+                finished = true;
+                onFinish(input.value.trim());
+            };
+            const cancel = () => {
+                if (finished) return;
+                finished = true;
+                onFinish(null);
+            };
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') commit();
+                else if (e.key === 'Escape') cancel();
+            });
+            input.addEventListener('blur', () => commit());
+        }
+
+        // 改名大类
+        function renameGroup(oldName, item) {
+            if (oldName === '默认') { showToast('「默认」是系统保留大类，不可改名', 2000); return; }
+            const nameEl = item.querySelector('.group-name');
+            startInlineRename(nameEl, oldName, (nn) => {
+                if (nn && nn !== oldName) {
+                    if (state.categories.groups.includes(nn)) {
+                        showToast('该大类名称已存在', 1500);
+                    } else {
+                        const gi = state.categories.groups.indexOf(oldName);
+                        state.categories.groups[gi] = nn;
+                        state.categories.subs[nn] = state.categories.subs[oldName] || [];
+                        delete state.categories.subs[oldName];
+                        state.bookmarks.forEach(b => { if ((b.category || '默认') === oldName) b.category = nn; });
+                        if (state.currentGroup === oldName) state.currentGroup = nn;
+                        saveBookmarks();
+                        showToast('已改名', 1200);
+                    }
+                }
+                renderGroups();
+                renderSubs();
+                renderBookmarks();
+            });
+        }
+
+        // 删除大类：其下网站移到「默认」大类（小类保留，自动并入默认）
+        function deleteGroup(name) {
+            if (name === '默认') { showToast('「默认」是系统保留大类，不可删除', 2000); return; }
+            const count = state.bookmarks.filter(b => (b.category || '默认') === name).length;
+            const msg = count > 0
+                ? `删除大类「${name}」？其中 ${count} 个网站将移到「默认」大类。`
+                : `确定删除大类「${name}」？`;
+            if (!confirm(msg)) return;
+            state.bookmarks.forEach(b => { if ((b.category || '默认') === name) b.category = '默认'; });
+            state.categories.groups = state.categories.groups.filter(g => g !== name);
+            delete state.categories.subs[name];
+            if (state.currentGroup === name) { state.currentGroup = '默认'; state.currentSub = 'all'; }
+            collectCategories();
+            renderGroups();
+            renderSubs();
+            renderBookmarks();
+            saveBookmarks();
+            showToast('已删除', 1200);
+        }
+
+        // 改名小类
+        function renameSub(group, oldName, item) {
+            if (oldName === '未分类') { showToast('「未分类」是系统保留小类，不可改名', 2000); return; }
+            const nameEl = item.querySelector('.sub-name');
+            startInlineRename(nameEl, oldName, (nn) => {
+                if (nn && nn !== oldName) {
+                    const subs = state.categories.subs[group] || [];
+                    if (subs.includes(nn)) {
+                        showToast('该小类名称已存在', 1500);
+                    } else {
+                        const si = subs.indexOf(oldName);
+                        if (si !== -1) subs[si] = nn;
+                        state.bookmarks.forEach(b => {
+                            if ((b.category || '默认') === group && (b.subCategory || '未分类') === oldName) b.subCategory = nn;
+                        });
+                        if (state.currentGroup === group && state.currentSub === oldName) state.currentSub = nn;
+                        saveBookmarks();
+                        showToast('已改名', 1200);
+                    }
+                }
+                renderSubs();
+                renderBookmarks();
+            });
+        }
+
+        // 删除小类：其下网站移到「未分类」
+        function deleteSub(group, name) {
+            if (name === '未分类') { showToast('「未分类」是系统保留小类，不可删除', 2000); return; }
+            const count = state.bookmarks.filter(b => (b.category || '默认') === group && (b.subCategory || '未分类') === name).length;
+            const msg = count > 0
+                ? `删除小类「${name}」？其中 ${count} 个网站将移到「未分类」。`
+                : `确定删除小类「${name}」？`;
+            if (!confirm(msg)) return;
+            state.bookmarks.forEach(b => {
+                if ((b.category || '默认') === group && (b.subCategory || '未分类') === name) b.subCategory = '未分类';
+            });
+            state.categories.subs[group] = (state.categories.subs[group] || []).filter(s => s !== name);
+            if (state.currentGroup === group && state.currentSub === name) state.currentSub = 'all';
+            collectCategories();
+            renderGroups();
+            renderSubs();
+            renderBookmarks();
+            saveBookmarks();
+            showToast('已删除', 1200);
         }
 
         // 内联新建大类：在大类栏插入输入框
