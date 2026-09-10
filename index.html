@@ -263,6 +263,8 @@
             border-radius: 8px;
             color: var(--text-color);
             overflow: hidden;
+            position: relative;
+            cursor: grab;
             transition: all 0.2s;
         }
 
@@ -284,7 +286,7 @@
             font-family: inherit;
             font-size: 14px;
             text-align: left;
-            padding: 9px 4px 9px 12px;
+            padding: 9px 4px 9px 22px;
             cursor: pointer;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -382,6 +384,7 @@
             border-radius: 18px;
             border: 1px solid var(--border-color);
             background-color: var(--card-background);
+            position: relative;
             transition: all 0.2s;
             overflow: hidden;
         }
@@ -404,7 +407,7 @@
             white-space: nowrap;
             font-family: inherit;
             font-size: 13px;
-            padding: 6px 4px 6px 14px;
+            padding: 6px 4px 6px 22px;
         }
 
         .sub-item .sub-act {
@@ -445,6 +448,50 @@
         .sub-item .rename-input {
             flex: none;
             width: 96px;
+        }
+
+        /* 分类拖拽手柄（视觉提示，绝对定位不挤占布局，pointer-events:none 不拦截点击） */
+        .group-item .group-drag,
+        .sub-item .sub-drag {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 5px;
+            display: flex;
+            align-items: center;
+            color: inherit;
+            opacity: 0;
+            font-size: 11px;
+            transition: opacity 0.15s;
+            pointer-events: none;
+        }
+
+        .group-item:hover .group-drag,
+        .sub-item:hover .sub-drag {
+            opacity: 0.45;
+        }
+
+        /* 触屏设备无 hover：手柄常显 */
+        @media (hover: none) {
+            .group-item .group-drag,
+            .sub-item .sub-drag { opacity: 0.4; }
+        }
+
+        /* 拖拽过程视觉反馈 */
+        .cat-ghost {
+            opacity: 0.4;
+            outline: 1px dashed var(--border-color);
+            outline-offset: -2px;
+            border-radius: 8px;
+        }
+
+        .sub-item.cat-ghost { border-radius: 18px; }
+
+        .cat-chosen { opacity: 0.9; }
+
+        .cat-drag {
+            opacity: 0.95;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
         }
 
         .add-sub-btn {
@@ -2319,6 +2366,44 @@
                     saveBookmarks();
                 }
             });
+
+            // 大类拖拽排序（左侧栏）：整条可拖，改名/删除按钮与重命名输入框除外
+            new Sortable(elements.groupList, {
+                animation: 150,
+                draggable: '.group-item',
+                filter: '.group-act, .rename-input',
+                ghostClass: 'cat-ghost',
+                chosenClass: 'cat-chosen',
+                dragClass: 'cat-drag',
+                onEnd: function() {
+                    const order = Array.from(elements.groupList.querySelectorAll('.group-item'))
+                        .map(el => el.dataset.group);
+                    if (order.length) {
+                        state.categories.groups = order;
+                        saveBookmarks();
+                    }
+                }
+            });
+
+            // 小类拖拽排序（限当前大类内）：只允许拖动 .sub-item
+            new Sortable(elements.subcategoriesContainer, {
+                animation: 150,
+                draggable: '.sub-item',
+                filter: '.sub-act, .rename-input',
+                ghostClass: 'cat-ghost',
+                chosenClass: 'cat-chosen',
+                dragClass: 'cat-drag',
+                onEnd: function() {
+                    const group = state.currentGroup;
+                    const order = Array.from(elements.subcategoriesContainer.querySelectorAll('.sub-item'))
+                        .map(el => el.dataset.sub);
+                    if (order.length) {
+                        state.categories.subs[group] = order;
+                    }
+                    renderSubs(); // 归一化位置：把误拖到「全部 / ＋」外侧的项归位
+                    saveBookmarks();
+                }
+            });
         }
 
         // 渲染大类（左侧栏）
@@ -2327,6 +2412,7 @@
                 const isActive = g === state.currentGroup;
                 const gs = escapeHtml(g);
                 return `<div class="group-item ${isActive ? 'active' : ''}" data-group="${gs}">
+                    <span class="group-drag" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
                     <button type="button" class="group-name" title="${gs}">${gs}</button>
                     <button type="button" class="group-act group-edit" title="改名"><i class="fas fa-pen"></i></button>
                     <button type="button" class="group-act group-del" title="删除"><i class="fas fa-trash"></i></button>
@@ -2364,6 +2450,7 @@
                     return `<button type="button" class="sub-btn ${isActive ? 'active' : ''}" data-sub="all">全部</button>`;
                 }
                 return `<div class="sub-item ${isActive ? 'active' : ''}" data-sub="${ss}">
+                    <span class="sub-drag" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
                     <button type="button" class="sub-name">${ss}</button>
                     <button type="button" class="sub-act sub-edit" title="改名"><i class="fas fa-pen"></i></button>
                     <button type="button" class="sub-act sub-del" title="删除"><i class="fas fa-trash"></i></button>
