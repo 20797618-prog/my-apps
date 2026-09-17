@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>外观风格预览 · 简约导航</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* ============================================================
+       外观风格预览 —— 仅用于选型确认，不是正式页面
+       三套皮肤：apple（风格1）/ hacker（风格2）/ kindle（当前对照）
+       每套各有 light / dark
+       ============================================================ */
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ---------- 皮肤令牌 ---------- */
+
+    /* 风格 1 · 苹果 · 浅色 */
+    body[data-style="apple"][data-mode="light"] {
+        --bg: #F5F5F7;
+        --bg-image:
+            radial-gradient(900px 430px at 10% -12%, rgba(0,122,255,.10), transparent 62%),
+            radial-gradient(760px 400px at 102% -6%, rgba(175,82,222,.10), transparent 58%);
+        --panel: rgba(255,255,255,.76);
+        --panel-solid: #FFFFFF;
+        --panel-2: rgba(0,0,0,.045);
+        --text: #1D1D1F;
+        --muted: #86868B;
+        --border: rgba(0,0,0,.09);
+        --accent: #0071E3;
+        --accent-2: #AF52DE;
+        --accent-soft: rgba(0,113,227,.10);
+        --accent-text: #FFFFFF;
+        --shadow: 0 1px 2px rgba(0,0,0,.04), 0 10px 28px rgba(0,0,0,.07);
+        --shadow-hover: 0 2px 6px rgba(0,0,0,.05), 0 18px 44px rgba(0,0,0,.12);
+        --radius: 20px; --radius-sm: 12px; --radius-pill: 980px;
+        --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        --tag-bg: rgba(0,113,227,.10); --tag-text: #0071E3;
+        --blur: saturate(180%) blur(20px);
+        --weight-title: 600;
+        --track: -0.01em;
+    }
+
+    /* 风格 1 · 苹果 · 深色 */
+    body[data-style="apple"][data-mode="dark"] {
+        --bg: #161618;
+        --bg-image:
+            radial-gradient(900px 430px at 10% -12%, rgba(10,132,255,.18), transparent 62%),
+            radial-gradient(760px 400px at 102% -6%, rgba(191,90,242,.16), transparent 58%);
+        --panel: rgba(40,40,43,.72);
+        --panel-solid: #242426;
+        --panel-2: rgba(255,255,255,.07);
+        --text: #F5F5F7;
+        --muted: #98989D;
+        --border: rgba(255,255,255,.10);
+        --accent: #0A84FF;
+        --accent-2: #BF5AF2;
+        --accent-soft: rgba(10,132,255,.16);
+        --accent-text: #FFFFFF;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 14px 34px rgba(0,0,0,.45);
+        --shadow-hover: 0 2px 8px rgba(0,0,0,.5), 0 22px 50px rgba(0,0,0,.55);
+        --radius: 20px; --radius-sm: 12px; --radius-pill: 980px;
+        --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        --tag-bg: rgba(10,132,255,.18); --tag-text: #6BB6FF;
+        --blur: saturate(180%) blur(20px);
+        --weight-title: 600;
+        --track: -0.01em;
+    }
+
+    /* 风格 2 · 科技/黑客 · 深色（签名样式） */
+    body[data-style="hacker"][data-mode="dark"] {
+        --bg: #05070A;
+        --bg-image:
+            radial-gradient(720px 380px at 12% -8%, rgba(0,255,156,.10), transparent 62%),
+            linear-gradient(rgba(0,255,156,.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,255,156,.05) 1px, transparent 1px);
+        --bg-size: auto, 100% 30px, 30px 100%;
+        --panel: rgba(9,14,19,.86);
+        --panel-solid: #0A0F14;
+        --panel-2: rgba(0,255,156,.07);
+        --text: #C6FFE4;
+        --muted: #4E8C6E;
+        --border: rgba(0,255,156,.22);
+        --accent: #00FF9C;
+        --accent-2: #22D3EE;
+        --accent-soft: rgba(0,255,156,.12);
+        --accent-text: #04120A;
+        --shadow: 0 0 0 1px rgba(0,255,156,.10), 0 14px 34px rgba(0,0,0,.55);
+        --shadow-hover: 0 0 0 1px rgba(0,255,156,.34), 0 0 22px rgba(0,255,156,.16), 0 18px 40px rgba(0,0,0,.6);
+        --radius: 6px; --radius-sm: 4px; --radius-pill: 6px;
+        --font: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "JetBrains Mono", "Liberation Mono", monospace;
+        --tag-bg: rgba(0,255,156,.10); --tag-text: #57FFB0;
+        --blur: none;
+        --weight-title: 600;
+        --track: .02em;
+        --neon: 0 0 10px rgba(0,255,156,.45);
+    }
+
+    /* 风格 2 · 科技/黑客 · 浅色（清亮终端） */
+    body[data-style="hacker"][data-mode="light"] {
+        --bg: #EEF3EE;
+        --bg-image:
+            radial-gradient(720px 380px at 12% -8%, rgba(0,168,107,.10), transparent 62%),
+            linear-gradient(rgba(0,120,80,.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,120,80,.07) 1px, transparent 1px);
+        --bg-size: auto, 100% 30px, 30px 100%;
+        --panel: #FFFFFF;
+        --panel-solid: #FFFFFF;
+        --panel-2: rgba(0,120,80,.06);
+        --text: #0A2016;
+        --muted: #4A6B58;
+        --border: rgba(0,120,80,.28);
+        --accent: #009B62;
+        --accent-2: #0E7490;
+        --accent-soft: rgba(0,155,98,.12);
+        --accent-text: #FFFFFF;
+        --shadow: 0 0 0 1px rgba(0,120,80,.10), 0 6px 18px rgba(0,80,55,.10);
+        --shadow-hover: 0 0 0 1px rgba(0,120,80,.34), 0 12px 28px rgba(0,80,55,.16);
+        --radius: 6px; --radius-sm: 4px; --radius-pill: 6px;
+        --font: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "JetBrains Mono", "Liberation Mono", monospace;
+        --tag-bg: rgba(0,155,98,.10); --tag-text: #00794D;
+        --blur: none;
+        --weight-title: 700;
+        --track: .02em;
+        --neon: none;
+    }
+
+    /* 对照 · 当前 Kindle 风 · 浅色 */
+    body[data-style="kindle"][data-mode="light"] {
+        --bg: #F4EFE3; --bg-image: none; --bg-size: auto;
+        --panel: #FCF9F1; --panel-solid: #FCF9F1; --panel-2: rgba(107,91,62,.07);
+        --text: #38332B; --muted: #857C6B; --border: #E3DBC7;
+        --accent: #6B5B3E; --accent-2: #8A7551; --accent-soft: rgba(107,91,62,.10); --accent-text: #FFF;
+        --shadow: 0 2px 10px rgba(0,0,0,.08); --shadow-hover: 0 6px 18px rgba(0,0,0,.12);
+        --radius: 12px; --radius-sm: 8px; --radius-pill: 18px;
+        --font: Georgia, "Songti SC", "Noto Serif SC", "STSong", serif;
+        --tag-bg: rgba(107,91,62,.10); --tag-text: #6B5B3E;
+        --blur: none; --weight-title: 500; --track: 0; --neon: none;
+    }
+
+    /* 对照 · 当前 Kindle 风 · 深色 */
+    body[data-style="kindle"][data-mode="dark"] {
+        --bg: #2A2520; --bg-image: none; --bg-size: auto;
+        --panel: #332D26; --panel-solid: #332D26; --panel-2: rgba(200,160,90,.09);
+        --text: #E5DCC8; --muted: #9A8F7C; --border: #4A443A;
+        --accent: #C8A05A; --accent-2: #E0C07A; --accent-soft: rgba(200,160,90,.14); --accent-text: #2A2520;
+        --shadow: 0 2px 10px rgba(0,0,0,.3); --shadow-hover: 0 6px 18px rgba(0,0,0,.4);
+        --radius: 12px; --radius-sm: 8px; --radius-pill: 18px;
+        --font: Georgia, "Songti SC", "Noto Serif SC", "STSong", serif;
+        --tag-bg: rgba(200,160,90,.14); --tag-text: #E0C07A;
+        --blur: none; --weight-title: 500; --track: 0; --neon: none;
+    }
+
+    /* ---------- 基础 ---------- */
+    body {
+        font-family: var(--font);
+        letter-spacing: var(--track);
+        background-color: var(--bg);
+        background-image: var(--bg-image);
+        background-size: var(--bg-size, auto);
+        background-attachment: fixed;
+        color: var(--text);
+        min-height: 100vh;
+        transition: background-color .35s, color .35s;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* 黑客风扫描线 */
+    body[data-style="hacker"]::after {
+        content: "";
+        position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+        background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.05) 2px 4px);
+        opacity: .5;
+    }
+    body[data-style="hacker"][data-mode="light"]::after { opacity: .18; }
+
+    /* ---------- 顶部控制条 ---------- */
+    .ctrl {
+        position: sticky; top: 0; z-index: 50;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+        padding: 12px 20px;
+        background: var(--panel);
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+        border-bottom: 1px solid var(--border);
+    }
+    .ctrl-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ctrl-label {
+        font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em;
+        margin-right: 2px;
+    }
+    body[data-style="hacker"] .ctrl-label::before { content: "// "; color: var(--accent); }
+    .ctrl-btn {
+        font-family: inherit; font-size: 13px; cursor: pointer;
+        padding: 7px 14px; border-radius: var(--radius-pill);
+        border: 1px solid var(--border); background: transparent; color: var(--text);
+        transition: all .2s;
+    }
+    .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ctrl-btn.is-on {
+        background: var(--accent); border-color: var(--accent); color: var(--accent-text);
+        box-shadow: var(--neon, none);
+    }
+    .ctrl-hint { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    /* ---------- 页面容器 ---------- */
+    .page { max-width: 1400px; margin: 0 auto; padding: 26px 24px 80px; }
+
+    /* ---------- 头部 ---------- */
+    .mock-header {
+        display: flex; justify-content: space-between; align-items: center; gap: 18px;
+        padding-bottom: 20px; margin-bottom: 26px;
+        border-bottom: 1px solid var(--border);
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo i { font-size: 26px; color: var(--accent); }
+    body[data-style="hacker"] .logo i { text-shadow: var(--neon); }
+    .logo h1 { font-size: 20px; font-weight: var(--weight-title); letter-spacing: .02em; }
+    body[data-style="hacker"] .logo h1::after {
+        content: "_"; color: var(--accent); animation: blink 1.1s steps(1) infinite; margin-left: 2px;
+    }
+    @keyframes blink { 0%,50% { opacity: 1; } 50.01%,100% { opacity: 0; } }
+
+    .actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+
+    .search {
+        position: relative;
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: var(--radius-pill);
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+    }
+    .search i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; }
+    .search input {
+        font-family: inherit; font-size: 13px; color: var(--text);
+        background: transparent; border: none; outline: none;
+        padding: 9px 16px 9px 36px; width: 200px;
+    }
+
+    .btn {
+        font-family: inherit; font-size: 13px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 9px 15px; border-radius: var(--radius-sm);
+        border: 1px solid var(--border); background: var(--panel); color: var(--text);
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+        transition: all .2s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary {
+        background: var(--accent); border-color: var(--accent); color: var(--accent-text);
+        border-radius: var(--radius-pill); font-weight: 600;
+        box-shadow: var(--neon, none);
+    }
+    .btn.primary:hover { filter: brightness(1.06); color: var(--accent-text); }
+    body[data-style="apple"] .btn { border-radius: var(--radius-pill); }
+    body[data-style="hacker"] .btn { text-transform: uppercase; font-size: 12px; letter-spacing: .06em; }
+
+    .toggle {
+        width: 50px; height: 28px; border-radius: 14px; position: relative; cursor: pointer;
+        background: var(--panel-2); border: 1px solid var(--border); flex-shrink: 0;
+    }
+    body[data-style="hacker"] .toggle { border-radius: 4px; }
+    .toggle .knob {
+        position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+        background: var(--accent); color: var(--accent-text);
+        display: flex; align-items: center; justify-content: center; font-size: 10px;
+        box-shadow: var(--neon, none);
+    }
+    body[data-mode="dark"] .toggle .knob { left: 26px; }
+    body[data-style="hacker"] .toggle .knob { border-radius: 2px; }
+
+    .badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 9px 5px 11px; border-radius: var(--radius-pill);
+        background: var(--panel); border: 1px solid var(--border);
+        font-size: 12px; color: var(--text); white-space: nowrap;
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+    }
+    .badge i.fa-user-circle { color: var(--accent); }
+    .badge .num { color: var(--muted); }
+
+    /* ---------- 使用说明 ---------- */
+    .intro {
+        position: relative;
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 18px 22px; margin-bottom: 24px;
+        box-shadow: var(--shadow);
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+    }
+    body[data-style="kindle"] .intro { border-left: 3px solid var(--accent); }
+    body[data-style="hacker"] .intro { border-left: 2px solid var(--accent); }
+    body[data-style="hacker"] .intro::before {
+        content: "＞"; position: absolute; left: 8px; top: 16px; color: var(--accent);
+        font-size: 13px; text-shadow: var(--neon);
+    }
+    body[data-style="hacker"] .intro { padding-left: 30px; }
+    .intro-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+    .intro-title { font-size: 15px; font-weight: var(--weight-title); letter-spacing: .04em; }
+    .intro-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .intro-list li {
+        position: relative; padding-left: 22px; font-size: 13.5px; color: var(--text); opacity: .92;
+    }
+    .intro-list li::before {
+        position: absolute; left: 0; top: 0;
+        color: var(--accent); font-size: 12px; font-weight: 600;
+    }
+    .intro-list { counter-reset: n; }
+    .intro-list li { counter-increment: n; }
+    .intro-list li::before { content: counter(n); }
+    body[data-style="apple"] .intro-list li::before {
+        content: counter(n); width: 16px; height: 16px; border-radius: 50%;
+        background: var(--accent-soft); color: var(--accent);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 10px; top: 3px;
+    }
+    body[data-style="hacker"] .intro-list li::before { content: "[" counter(n) "]"; }
+    body[data-style="kindle"] .intro-list li::before { content: counter(n) "、"; }
+    .intro-note { color: var(--muted); font-size: 12px; }
+    .intro-dev { color: var(--muted); font-size: 12.5px; opacity: .85; }
+
+    /* ---------- 主布局 ---------- */
+    .layout { display: flex; gap: 22px; align-items: flex-start; }
+    .sidebar {
+        width: 168px; flex-shrink: 0;
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 12px;
+        box-shadow: var(--shadow);
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+        position: sticky; top: 76px;
+    }
+    .side-title {
+        font-size: 12px; color: var(--muted); letter-spacing: .08em;
+        padding: 0 8px 9px; border-bottom: 1px solid var(--border); margin-bottom: 7px;
+    }
+    body[data-style="hacker"] .side-title::before { content: "// "; color: var(--accent); }
+    .side-item {
+        display: flex; align-items: center; gap: 5px;
+        padding: 9px 12px; border-radius: var(--radius-sm); font-size: 14px; cursor: pointer;
+        transition: all .18s;
+    }
+    .side-item .grip { opacity: 0; font-size: 10px; color: inherit; width: 10px; transition: opacity .15s; }
+    .side-item:hover .grip { opacity: .45; }
+    .side-item:hover { background: var(--panel-2); }
+    .side-item.active {
+        background: var(--accent-soft); color: var(--accent); font-weight: 600;
+    }
+    body[data-style="hacker"] .side-item.active {
+        background: var(--accent-soft); border-left: 2px solid var(--accent);
+        text-shadow: var(--neon); box-shadow: inset 0 0 18px rgba(0,255,156,.06);
+    }
+    .side-add {
+        display: flex; align-items: center; justify-content: center; gap: 5px;
+        margin-top: 7px; padding: 8px; width: 100%;
+        border: 1px dashed var(--border); border-radius: var(--radius-sm);
+        background: none; color: var(--muted); font-family: inherit; font-size: 12.5px; cursor: pointer;
+    }
+    .side-add:hover { color: var(--accent); border-color: var(--accent); }
+
+    .content { flex: 1; min-width: 0; }
+
+    .subbar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .chip {
+        padding: 6px 15px; border-radius: var(--radius-pill);
+        border: 1px solid var(--border); background: var(--panel); color: var(--text);
+        font-family: inherit; font-size: 13px; cursor: pointer;
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+        transition: all .18s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.active {
+        background: var(--accent); border-color: var(--accent); color: var(--accent-text);
+        box-shadow: var(--neon, none);
+    }
+    body[data-style="hacker"] .chip { text-transform: uppercase; font-size: 11.5px; letter-spacing: .05em; }
+    body[data-style="apple"] .chip.active { box-shadow: 0 2px 8px rgba(0,113,227,.28); }
+    .chip-add {
+        width: 27px; height: 27px; border-radius: 50%; border: 1px dashed var(--border);
+        background: none; color: var(--muted); cursor: pointer; font-size: 12px;
+    }
+    body[data-style="hacker"] .chip-add { border-radius: 4px; }
+    .chip-add:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ---------- 书签卡片 ---------- */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+    .card {
+        position: relative; overflow: hidden;
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 16px;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+        box-shadow: var(--shadow); cursor: pointer;
+        transition: transform .22s, box-shadow .22s, border-color .22s;
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+    }
+    .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: var(--shadow-hover); }
+    body[data-style="hacker"] .card:hover { transform: none; }
+    .card .ic {
+        width: 42px; height: 42px; border-radius: var(--radius-sm); flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 17px; font-weight: 600;
+        background: var(--panel-2); color: var(--accent);
+    }
+    body[data-style="hacker"] .ic { border: 1px solid var(--border); text-shadow: var(--neon); }
+    .card-body { flex: 1; min-width: 0; }
+    .card-title { font-size: 14.5px; font-weight: var(--weight-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-url { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .card-tags { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; }
+    .tag {
+        font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill);
+        background: var(--tag-bg); color: var(--tag-text);
+    }
+    body[data-style="hacker"] .tag { border-radius: 3px; }
+    .card-actions {
+        position: absolute; top: 10px; right: 10px; display: flex; gap: 4px;
+        opacity: 0; transition: opacity .2s;
+    }
+    .card:hover .card-actions { opacity: 1; }
+    .card-actions button {
+        width: 26px; height: 26px; border-radius: var(--radius-sm); cursor: pointer;
+        border: 1px solid var(--border); background: var(--panel-solid); color: var(--muted);
+        font-size: 11px;
+    }
+    .card-actions button:hover { color: var(--accent); border-color: var(--accent); }
+    body[data-style="hacker"] .card-actions button { border-radius: 3px; }
+
+    /* ---------- 弹窗预览 ---------- */
+    .sec-title {
+        font-size: 12px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase;
+        margin: 44px 0 14px;
+    }
+    body[data-style="hacker"] .sec-title::before { content: "// "; color: var(--accent); }
+    .modal-card {
+        max-width: 440px;
+        background: var(--panel-solid); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 22px;
+        box-shadow: var(--shadow);
+        -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+    }
+    body[data-style="hacker"] .modal-card { background: var(--panel); }
+    .modal-head {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .modal-head h3 { font-size: 16px; font-weight: var(--weight-title); }
+    .modal-head .x { color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+    body[data-style="hacker"] .field label::before { content: "> "; color: var(--accent); }
+    .field input, .field select {
+        width: 100%; font-family: inherit; font-size: 13.5px; color: var(--text);
+        background: var(--panel-2); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 10px 12px; outline: none;
+    }
+    body[data-style="apple"] .field input, body[data-style="apple"] .field select {
+        background: var(--panel-solid); border-radius: 10px;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .field select { appearance: none; }
+    .row { display: flex; gap: 9px; }
+    .row .field { flex: 1; }
+    .plus-btn {
+        flex-shrink: 0; width: 40px; align-self: flex-end; height: 40px;
+        border-radius: var(--radius-sm); border: 1px solid var(--border);
+        background: var(--panel-2); color: var(--muted); cursor: pointer;
+    }
+    .modal-foot { display: flex; gap: 9px; margin-top: 20px; }
+    .modal-foot .btn { flex: 1; justify-content: center; }
+    .btn.ghost { background: transparent; }
+
+    .foot-note { margin-top: 34px; font-size: 12.5px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body data-style="apple" data-mode="light">
+
+    <!-- ===== 控制条 ===== -->
+    <div class="ctrl">
+        <div class="ctrl-group">
+            <span class="ctrl-label">外观风格</span>
+            <button class="ctrl-btn is-on" data-set-style="apple" data-sign="light">风格 1 · 苹果设计</button>
+            <button class="ctrl-btn" data-set-style="hacker" data-sign="dark">风格 2 · 科技 / 黑客</button>
+            <button class="ctrl-btn" data-set-style="kindle" data-sign="light">对照 · 当前 Kindle</button>
+        </div>
+        <div class="ctrl-group">
+            <span class="ctrl-label">明暗</span>
+            <button class="ctrl-btn is-on" data-set-mode="light">浅色</button>
+            <button class="ctrl-btn" data-set-mode="dark">深色</button>
+        </div>
+        <div class="ctrl-hint" id="ctrlHint">风格 1 · 苹果设计 · 浅色</div>
+    </div>
+
+    <div class="page">
+        <!-- ===== 头部 ===== -->
+        <header class="mock-header">
+            <div class="logo">
+                <i class="fas fa-compass"></i>
+                <h1>简约导航</h1>
+            </div>
+            <div class="actions">
+                <div class="search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索网站...">
+                </div>
+                <button class="btn"><i class="fas fa-download"></i>导出</button>
+                <button class="btn"><i class="fas fa-upload"></i>导入</button>
+                <button class="btn"><i class="fas fa-check-square"></i>全选</button>
+                <button class="btn primary"><i class="fas fa-plus"></i>添加网站</button>
+                <div class="toggle"><span class="knob"><i class="fas fa-sun"></i></span></div>
+                <span class="badge">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="num">20797618@qq.com</span>
+                    <i class="fas fa-key" style="color:var(--muted);font-size:11px"></i>
+                    <i class="fas fa-sign-out-alt" style="color:var(--muted);font-size:11px"></i>
+                </span>
+            </div>
+        </header>
+
+        <!-- ===== 使用说明 ===== -->
+        <section class="intro">
+            <div class="intro-head">
+                <i class="fas fa-book-open" style="color:var(--accent)"></i>
+                <h2 class="intro-title">使用说明</h2>
+            </div>
+            <ol class="intro-list">
+                <li>把常用的网站放在一起，方便随时打开；</li>
+                <li>勾选多个网站，可以一次性同时打开；<span class="intro-note">（第一次需要先解除浏览器的弹窗拦截）</span></li>
+                <li class="intro-dev">目前本应用还在初期开发阶段，功能会持续完善。</li>
+            </ol>
+        </section>
+
+        <!-- ===== 主布局 ===== -->
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="side-title">分类</div>
+                <div class="side-item"><span class="grip"><i class="fas fa-grip-vertical"></i></span>默认</div>
+                <div class="side-item active"><span class="grip"><i class="fas fa-grip-vertical"></i></span>工作</div>
+                <div class="side-item"><span class="grip"><i class="fas fa-grip-vertical"></i></span>学习</div>
+                <button class="side-add"><i class="fas fa-plus"></i>新建分类</button>
+            </aside>
+
+            <div class="content">
+                <div class="subbar">
+                    <button class="chip active">全部</button>
+                    <button class="chip">开发</button>
+                    <button class="chip">设计</button>
+                    <button class="chip-add"><i class="fas fa-plus"></i></button>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <div class="ic">G</div>
+                        <div class="card-body">
+                            <div class="card-title">GitHub</div>
+                            <div class="card-url">github.com</div>
+                        </div>
+                        <div class="card-tags"><span class="tag">代码托管</span></div>
+                        <div class="card-actions"><button><i class="fas fa-edit"></i></button><button><i class="fas fa-trash"></i></button></div>
+                    </div>
+                    <div class="card">
+                        <div class="ic">D</div>
+                        <div class="card-body">
+                            <div class="card-title">Dribbble</div>
+                            <div class="card-url">dribbble.com</div>
+                        </div>
+                        <div class="card-tags"><span class="tag">设计</span></div>
+                        <div class="card-actions"><button><i class="fas fa-edit"></i></button><button><i class="fas fa-trash"></i></button></div>
+                    </div>
+                    <div class="card">
+                        <div class="ic">N</div>
+                        <div class="card-body">
+                            <div class="card-title">Notion</div>
+                            <div class="card-url">notion.so</div>
+                        </div>
+                        <div class="card-tags"><span class="tag">笔记</span></div>
+                        <div class="card-actions"><button><i class="fas fa-edit"></i></button><button><i class="fas fa-trash"></i></button></div>
+                    </div>
+                    <div class="card">
+                        <div class="ic">F</div>
+                        <div class="card-body">
+                            <div class="card-title">Figma</div>
+                            <div class="card-url">figma.com</div>
+                        </div>
+                        <div class="card-tags"><span class="tag">设计</span><span class="tag">协作</span></div>
+                        <div class="card-actions"><button><i class="fas fa-edit"></i></button><button><i class="fas fa-trash"></i></button></div>
+                    </div>
+                    <div class="card">
+                        <div class="ic">M</div>
+                        <div class="card-body">
+                            <div class="card-title">MDN</div>
+                            <div class="card-url">developer.mozilla.org</div>
+                        </div>
+                        <div class="card-tags"><span class="tag">文档</span></div>
+                        <div class="card-actions"><button><i class="fas fa-edit"></i></button><button><i class="fas fa-trash"></i></button></div>
+                    </div>
+                    <div class="card">
+                        <div class="ic">Y</div>
+                        <div class="card-body">
+                            <div class="card-title">YouTube</div>
+                            <div class="card-url">youtube.com</div>
+                        </div>
+                        <div class="card-tags"><span class="tag">视频</span></div>
+                        <div class="card-actions"><button><i class="fas fa-edit"></i></button><button><i class="fas fa-trash"></i></button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 弹窗预览 ===== -->
+        <div class="sec-title">添加网站弹窗</div>
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3>添加新网站</h3>
+                <span class="x">&times;</span>
+            </div>
+            <div class="field">
+                <label>网站名称 *</label>
+                <input type="text" value="GitHub" readonly>
+            </div>
+            <div class="field">
+                <label>网站地址 *</label>
+                <input type="text" value="https://github.com" readonly>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label>分类</label>
+                    <select><option>工作</option></select>
+                </div>
+                <button class="plus-btn"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label>小类</label>
+                    <select><option>开发</option></select>
+                </div>
+                <button class="plus-btn"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="field">
+                <label>标签（用逗号分隔）</label>
+                <input type="text" value="代码托管, 版本控制" readonly>
+            </div>
+            <div class="modal-foot">
+                <button class="btn ghost">取消</button>
+                <button class="btn primary">保存</button>
+            </div>
+        </div>
+
+        <p class="foot-note">以上为外观预览，功能与现有版本完全一致，仅换视觉皮肤。</p>
+    </div>
+
+<script>
+    (function () {
+        var styleNames = { apple: "风格 1 · 苹果设计", hacker: "风格 2 · 科技 / 黑客", kindle: "对照 · 当前 Kindle" };
+        var modeNames = { light: "浅色", dark: "深色" };
+        var hint = document.getElementById('ctrlHint');
+
+        function sync() {
+            var s = document.body.dataset.style;
+            var m = document.body.dataset.mode;
+            document.querySelectorAll('[data-set-style]').forEach(function (b) {
+                b.classList.toggle('is-on', b.dataset.setStyle === s);
+            });
+            document.querySelectorAll('[data-set-mode]').forEach(function (b) {
+                b.classList.toggle('is-on', b.dataset.setMode === m);
+            });
+            hint.textContent = styleNames[s] + " · " + modeNames[m];
+        }
+
+        document.querySelectorAll('[data-set-style]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                document.body.dataset.style = b.dataset.setStyle;
+                if (b.dataset.sign) document.body.dataset.mode = b.dataset.sign; // 用该风格的签名明暗
+                sync();
+            });
+        });
+        document.querySelectorAll('[data-set-mode]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                document.body.dataset.mode = b.dataset.setMode;
+                sync();
+            });
+        });
+
+        sync();
+    })();
+</script>
+</body>
+</html>

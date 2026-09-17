@@ -37,6 +37,101 @@
             --border-color: #4A443A;
         }
 
+        /* ============================================================
+           外观风格皮肤
+           组件 CSS 只引用 --primary-color 等既有令牌，所以换肤无需改组件。
+           kindle（纸质）= 默认，即上面的 :root / body.dark-theme
+           apple  = 苹果风      hacker = 科技/黑客风
+           每套各含 浅色 / 深色，深色由 body.dark-theme 组合触发。
+           ============================================================ */
+
+        /* 风格 1 · 苹果 —— 浅色 */
+        body[data-style="apple"] {
+            --primary-color: #0071E3;
+            --secondary-color: #0064CC;
+            --background-color: #F5F5F7;
+            --card-background: #FFFFFF;
+            --text-color: #1D1D1F;
+            --muted-color: #86868B;
+            --border-color: #E5E5EA;
+            --success-color: #34C759;
+            --danger-color: #FF3B30;
+            --warning-color: #FF9F0A;
+            --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 10px 26px rgba(0, 0, 0, .06);
+            --hover-shadow: 0 2px 6px rgba(0, 0, 0, .05), 0 18px 44px rgba(0, 0, 0, .13);
+            --glow: none;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background-image:
+                radial-gradient(900px 430px at 10% -12%, rgba(0, 122, 255, .10), transparent 62%),
+                radial-gradient(760px 400px at 102% -6%, rgba(175, 82, 222, .10), transparent 58%);
+            background-attachment: fixed;
+        }
+
+        /* 风格 1 · 苹果 —— 深色 */
+        body[data-style="apple"].dark-theme {
+            --primary-color: #0A84FF;
+            --secondary-color: #409CFF;
+            --background-color: #161618;
+            --card-background: #242426;
+            --text-color: #F5F5F7;
+            --muted-color: #98989D;
+            --border-color: #3A3A3C;
+            --success-color: #30D158;
+            --danger-color: #FF453A;
+            --warning-color: #FFD60A;
+            --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 14px 34px rgba(0, 0, 0, .45);
+            --hover-shadow: 0 2px 8px rgba(0, 0, 0, .5), 0 22px 50px rgba(0, 0, 0, .55);
+            background-image:
+                radial-gradient(900px 430px at 10% -12%, rgba(10, 132, 255, .18), transparent 62%),
+                radial-gradient(760px 400px at 102% -6%, rgba(191, 90, 242, .16), transparent 58%);
+        }
+
+        /* 风格 2 · 科技/黑客 —— 浅色（清亮终端） */
+        body[data-style="hacker"] {
+            --primary-color: #00845A;
+            --secondary-color: #006B49;
+            --background-color: #EEF3EE;
+            --card-background: #FFFFFF;
+            --text-color: #0A2016;
+            --muted-color: #4A6B58;
+            --border-color: #B9D6C7;
+            --success-color: #00845A;
+            --danger-color: #C2410C;
+            --warning-color: #B45309;
+            --shadow: 0 0 0 1px rgba(0, 120, 80, .10), 0 6px 18px rgba(0, 80, 55, .10);
+            --hover-shadow: 0 0 0 1px rgba(0, 120, 80, .34), 0 12px 28px rgba(0, 80, 55, .16);
+            --glow: rgba(0, 132, 90, .28);
+            font-family: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "JetBrains Mono", "Liberation Mono", monospace;
+            background-image:
+                radial-gradient(720px 380px at 12% -8%, rgba(0, 150, 100, .10), transparent 62%),
+                linear-gradient(rgba(0, 120, 80, .07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 120, 80, .07) 1px, transparent 1px);
+            background-size: auto, 100% 30px, 30px 100%;
+            background-attachment: fixed;
+        }
+
+        /* 风格 2 · 科技/黑客 —— 深色（签名样式） */
+        body[data-style="hacker"].dark-theme {
+            --primary-color: #00FF9C;
+            --secondary-color: #33FFB4;
+            --background-color: #05070A;
+            --card-background: #0A0F14;
+            --text-color: #C6FFE4;
+            --muted-color: #4E8C6E;
+            --border-color: rgba(0, 255, 156, .22);
+            --success-color: #00FF9C;
+            --danger-color: #FF5C5C;
+            --warning-color: #FFD166;
+            --shadow: 0 0 0 1px rgba(0, 255, 156, .10), 0 14px 34px rgba(0, 0, 0, .55);
+            --hover-shadow: 0 0 0 1px rgba(0, 255, 156, .34), 0 0 22px rgba(0, 255, 156, .16), 0 18px 40px rgba(0, 0, 0, .6);
+            --glow: rgba(0, 255, 156, .45);
+            background-image:
+                radial-gradient(720px 380px at 12% -8%, rgba(0, 255, 156, .10), transparent 62%),
+                linear-gradient(rgba(0, 255, 156, .05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 156, .05) 1px, transparent 1px);
+            background-size: auto, 100% 30px, 30px 100%;
+        }
+
         body {
             font-family: Georgia, 'Songti SC', 'Noto Serif SC', 'STSong', serif;
             background-color: var(--background-color);
@@ -1215,9 +1310,218 @@
                 justify-content: space-between;
             }
         }
+
+        /* ============================================================
+           外观风格：细节特化
+           只做圆角/字体/光效等“气质”差异，不改布局与功能
+           ============================================================ */
+
+        /* ---------- 风格 1 · 苹果：大圆角 / 胶囊按钮 / 毛玻璃 ---------- */
+        body[data-style="apple"] .btn { border-radius: 980px; }
+        body[data-style="apple"] .btn-outline { background-color: var(--card-background); }
+        body[data-style="apple"] .bookmark-card {
+            border-radius: 20px;
+            border-width: 1px;
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            backdrop-filter: saturate(180%) blur(20px);
+        }
+        body[data-style="apple"] .bookmark-card:hover { transform: translateY(-3px); }
+        body[data-style="apple"] .bookmark-icon { border-radius: 12px; }
+        body[data-style="apple"] .site-intro {
+            border-radius: 18px;
+            border-left: 1px solid var(--border-color);
+        }
+        body[data-style="apple"] .group-sidebar {
+            border-radius: 20px;
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            backdrop-filter: saturate(180%) blur(20px);
+        }
+        body[data-style="apple"] .group-item { border-radius: 10px; }
+        body[data-style="apple"] .sub-btn,
+        body[data-style="apple"] .sub-item,
+        body[data-style="apple"] .tag,
+        body[data-style="apple"] .toast,
+        body[data-style="apple"] .user-badge { border-radius: 980px; }
+        body[data-style="apple"] .modal-content,
+        body[data-style="apple"] .login-card { border-radius: 22px; }
+        body[data-style="apple"] .form-control { border-radius: 10px; }
+        body[data-style="apple"] .group-sidebar-title,
+        body[data-style="apple"] .logo h1 { letter-spacing: 0; }
+
+        /* ---------- 风格 2 · 科技/黑客：锐角 / 等宽 / 霓虹 ---------- */
+        body[data-style="hacker"] .btn {
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-size: 12.5px;
+        }
+        body[data-style="hacker"] .bookmark-card { border-radius: 6px; border-width: 1px; }
+        body[data-style="hacker"] .bookmark-card:hover { transform: none; box-shadow: var(--hover-shadow); }
+        body[data-style="hacker"] .bookmark-icon { border-radius: 4px; border: 1px solid var(--border-color); }
+        body[data-style="hacker"] .site-intro { border-radius: 6px; border-left-width: 2px; }
+        body[data-style="hacker"] .group-sidebar { border-radius: 6px; }
+        body[data-style="hacker"] .group-item { border-radius: 4px; }
+        body[data-style="hacker"] .group-item.active {
+            border-left: 2px solid var(--primary-color);
+            box-shadow: inset 0 0 18px var(--glow);
+            text-shadow: 0 0 10px var(--glow);
+        }
+        body[data-style="hacker"] .sub-btn,
+        body[data-style="hacker"] .sub-item { border-radius: 6px; }
+        body[data-style="hacker"] .modal-content,
+        body[data-style="hacker"] .login-card { border-radius: 6px; }
+        body[data-style="hacker"] .form-control { border-radius: 4px; }
+        body[data-style="hacker"] .tag { border-radius: 3px; }
+        body[data-style="hacker"] .toast { border-radius: 4px; }
+        body[data-style="hacker"] .user-badge { border-radius: 4px; }
+        body[data-style="hacker"] .theme-toggle,
+        body[data-style="hacker"] .theme-toggle i { border-radius: 4px; }
+        /* 科技风的明暗开关：描边 + 霓虹滑块，避免整块高亮抢视线 */
+        body[data-style="hacker"] .theme-toggle {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+        }
+        body[data-style="hacker"] .theme-toggle.active {
+            background-color: transparent;
+            border-color: var(--primary-color);
+        }
+        body[data-style="hacker"] .theme-toggle i,
+        body[data-style="hacker"] .theme-toggle.active i {
+            background-color: var(--primary-color);
+            color: #FFFFFF;
+            box-shadow: 0 0 10px var(--glow);
+        }
+        body[data-style="hacker"].dark-theme .theme-toggle i,
+        body[data-style="hacker"].dark-theme .theme-toggle.active i { color: #04120A; }
+        /* 苹果深色：开关图标用深蓝，保证在白滑块上可读 */
+        body[data-style="apple"].dark-theme .theme-toggle.active i { color: #0064CC; }
+        body[data-style="hacker"] .group-sidebar-title::before { content: "// "; color: var(--primary-color); }
+        body[data-style="hacker"] .site-intro-title::before { content: "> "; color: var(--primary-color); }
+        body[data-style="hacker"] .logo i { text-shadow: 0 0 12px var(--glow); }
+        body[data-style="hacker"] .logo h1::after {
+            content: "_";
+            color: var(--primary-color);
+            animation: nav-blink 1.1s steps(1) infinite;
+            margin-left: 2px;
+        }
+        body[data-style="hacker"] .btn-primary,
+        body[data-style="hacker"] .toast { box-shadow: 0 0 16px var(--glow); }
+        /* 霓虹底 + 深色字，保证对比度 */
+        body[data-style="hacker"].dark-theme .btn-primary,
+        body[data-style="hacker"].dark-theme .group-item.active,
+        body[data-style="hacker"].dark-theme .sub-btn.active,
+        body[data-style="hacker"].dark-theme .toast { color: #04120A; }
+        /* CRT 扫描线 */
+        body[data-style="hacker"]::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, .055) 2px 4px);
+            opacity: .55;
+        }
+        body[data-style="hacker"].dark-theme::after { opacity: .8; }
+        @keyframes nav-blink {
+            0%, 50% { opacity: 1; }
+            50.01%, 100% { opacity: 0; }
+        }
+
+        /* ---------- 外观风格选择器 ---------- */
+        .style-picker { position: relative; }
+        .style-trigger {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s;
+        }
+        .style-trigger:hover { color: var(--primary-color); border-color: var(--primary-color); }
+        body[data-style="hacker"] .style-trigger { border-radius: 4px; }
+        .style-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            z-index: 60;
+            min-width: 224px;
+            padding: 8px;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--hover-shadow);
+            display: none;
+        }
+        .style-menu.open { display: block; }
+        body[data-style="hacker"] .style-menu { border-radius: 4px; }
+        .style-menu-title {
+            font-size: 11px;
+            color: var(--muted-color);
+            letter-spacing: .08em;
+            padding: 4px 8px 8px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 6px;
+        }
+        body[data-style="hacker"] .style-menu-title::before { content: "// "; color: var(--primary-color); }
+        .style-opt {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 9px 8px;
+            border: none;
+            border-radius: 8px;
+            background: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13.5px;
+            text-align: left;
+            transition: background-color .15s;
+        }
+        .style-opt:hover { background-color: var(--background-color); }
+        body[data-style="hacker"] .style-opt { border-radius: 4px; }
+        .style-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+        }
+        body[data-style="hacker"] .style-dot { border-radius: 2px; }
+        .dot-kindle { background: #6B5B3E; }
+        .dot-apple { background: linear-gradient(135deg, #0071E3, #AF52DE); }
+        .dot-hacker { background: #00C77B; }
+        .style-opt-name { flex-shrink: 0; }
+        .style-opt-sub { flex: 1; color: var(--muted-color); font-size: 11.5px; text-align: right; }
+        .style-opt-check { color: var(--primary-color); opacity: 0; font-size: 12px; }
+        .style-opt.active .style-opt-check { opacity: 1; }
+        .style-menu-note {
+            font-size: 11px;
+            color: var(--muted-color);
+            padding: 8px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 6px;
+        }
     </style>
 </head>
-<body>
+<body data-style="kindle">
+    <script>
+        /* 尽早应用已保存的外观风格，避免首屏闪一下默认皮肤 */
+        try {
+            var savedStyle = localStorage.getItem('uiStyle');
+            if (savedStyle === 'apple' || savedStyle === 'hacker' || savedStyle === 'kindle') {
+                document.body.dataset.style = savedStyle;
+            }
+        } catch (e) { }
+    </script>
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
             <div class="auth-tabs" role="tablist">
@@ -1316,6 +1620,33 @@
             <button class="btn btn-primary" id="addBookmarkBtn">
                 <i class="fas fa-plus"></i>添加网站
             </button>
+            <div class="style-picker">
+                <button type="button" class="style-trigger" id="styleBtn" title="外观风格">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <div class="style-menu" id="styleMenu" role="menu">
+                    <div class="style-menu-title">外观风格</div>
+                    <button type="button" class="style-opt" data-style-opt="kindle" role="menuitem">
+                        <span class="style-dot dot-kindle"></span>
+                        <span class="style-opt-name">纸质风</span>
+                        <span class="style-opt-sub">默认</span>
+                        <i class="fas fa-check style-opt-check"></i>
+                    </button>
+                    <button type="button" class="style-opt" data-style-opt="apple" role="menuitem">
+                        <span class="style-dot dot-apple"></span>
+                        <span class="style-opt-name">苹果风</span>
+                        <span class="style-opt-sub">macOS 质感</span>
+                        <i class="fas fa-check style-opt-check"></i>
+                    </button>
+                    <button type="button" class="style-opt" data-style-opt="hacker" role="menuitem">
+                        <span class="style-dot dot-hacker"></span>
+                        <span class="style-opt-name">科技风</span>
+                        <span class="style-opt-sub">终端 / 霓虹</span>
+                        <i class="fas fa-check style-opt-check"></i>
+                    </button>
+                    <div class="style-menu-note">每套风格都支持浅色 / 深色，用旁边的开关切换</div>
+                </div>
+            </div>
             <div class="theme-toggle" id="themeToggle">
                 <i class="fas fa-sun"></i>
             </div>
@@ -1483,6 +1814,8 @@
             searchInput: document.getElementById('searchInput'),
             addBookmarkBtn: document.getElementById('addBookmarkBtn'),
             themeToggle: document.getElementById('themeToggle'),
+            styleBtn: document.getElementById('styleBtn'),
+            styleMenu: document.getElementById('styleMenu'),
             selectionBar: document.getElementById('selectionBar'),
             selectedCount: document.getElementById('selectedCount'),
             openSelectedBtn: document.getElementById('openSelectedBtn'),
@@ -1571,6 +1904,7 @@
         // 初始化应用程序
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
+            initStylePicker();
             loadBookmarks();
             initEventListeners();
             initSortable();
@@ -1775,6 +2109,57 @@
                 elements.themeToggle.classList.toggle('active', state.darkTheme);
                 localStorage.setItem('darkTheme', state.darkTheme);
                 updateThemeIcon();
+            });
+        }
+
+        // ---- 外观风格（纸质 / 苹果 / 科技），只影响本机显示，与账号数据无关 ----
+        const UI_STYLE_NAMES = { kindle: '纸质风', apple: '苹果风', hacker: '科技风' };
+        const UI_STYLE_KEYS = Object.keys(UI_STYLE_NAMES);
+
+        function applyUiStyle(name, persist) {
+            if (UI_STYLE_KEYS.indexOf(name) === -1) name = 'kindle';
+            document.body.dataset.style = name;
+            if (persist) {
+                try { localStorage.setItem('uiStyle', name); } catch (e) { }
+            }
+            if (elements.styleMenu) {
+                elements.styleMenu.querySelectorAll('.style-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.styleOpt === name);
+                });
+            }
+        }
+
+        function initStylePicker() {
+            applyUiStyle(localStorage.getItem('uiStyle') || 'kindle', false);
+
+            const btn = elements.styleBtn;
+            const menu = elements.styleMenu;
+            if (!btn || !menu) return;
+
+            // 打开/收起菜单
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('open');
+            });
+
+            // 选择风格
+            menu.querySelectorAll('.style-opt').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    const name = opt.dataset.styleOpt;
+                    applyUiStyle(name, true);
+                    menu.classList.remove('open');
+                    showToast('已切换为「' + (UI_STYLE_NAMES[name] || name) + '」', 1400);
+                });
+            });
+
+            // 点空白处 / Esc 收起
+            document.addEventListener('click', (e) => {
+                if (!menu.classList.contains('open')) return;
+                if (e.target.closest('.style-picker')) return;
+                menu.classList.remove('open');
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') menu.classList.remove('open');
             });
         }
 
