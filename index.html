@@ -1749,8 +1749,8 @@
                         <input type="text" id="bookmarkTags" class="form-control" placeholder="代码托管, 版本控制">
                     </div>
                     <div class="form-group">
-                        <label for="bookmarkIcon">图标URL（可选）</label>
-                        <input type="text" id="bookmarkIcon" class="form-control" placeholder="留空将自动获取网站图标">
+                        <label for="bookmarkIcon">自定义图标 URL（可选）</label>
+                        <input type="text" id="bookmarkIcon" class="form-control" placeholder="留空则显示网站名称首字">
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-outline" id="cancelBtn">取消</button>
@@ -3085,23 +3085,28 @@
             return hash;
         }
 
-        // 渲染图标：favicon 优先，失败或缺失时回退到柔和色首字母块
+        // 取「用户自定义」的图标地址。
+        // 老数据里 icon 可能存的是系统当年自动抓的 favicon（恰好等于 getFaviconUrl(url)），
+        // 那种不算自定义，一律回退首字块；只有用户亲手填的地址才生效。
+        function getCustomIcon(bookmark) {
+            const icon = bookmark && bookmark.icon;
+            if (!icon || typeof icon !== 'string' || !/^https?:\/\//.test(icon)) return '';
+            if (bookmark.url && icon === getFaviconUrl(bookmark.url)) return '';
+            return icon;
+        }
+
+        // 渲染图标：默认显示网站名称首字（柔和色块），仅当用户自定义了图标 URL 才加载图片
         function renderIcon(bookmark) {
             const name = bookmark.name || '';
             const idx = hashString(name) % ICON_PALETTE.length;
             const c = ICON_PALETTE[idx];
-            const letter = name.trim().charAt(0) || '?';
-            const fallback = `<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:${c.bg};color:${c.fg};border-radius:12px;">${letter}</span>`;
+            const letter = (Array.from(name.trim())[0] || '?').toUpperCase();
+            const fallback = `<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:${c.bg};color:${c.fg};border-radius:12px;">${escapeHtml(letter)}</span>`;
 
-            const isFavicon = bookmark.icon &&
-                typeof bookmark.icon === 'string' &&
-                /^https?:\/\//.test(bookmark.icon);
+            const custom = getCustomIcon(bookmark);
+            if (!custom) return fallback;
 
-            if (!isFavicon) {
-                return fallback;
-            }
-
-            return `${fallback}<img src="${bookmark.icon}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.remove();">`;
+            return `${fallback}<img src="${escapeHtml(custom)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.remove();">`;
         }
 
         // 渲染书签
@@ -3483,7 +3488,7 @@
                     group: bookmark.category || '默认',
                     sub: bookmark.subCategory || '未分类',
                     tags: bookmark.tags ? bookmark.tags.join(', ') : '',
-                    icon: bookmark.icon || ''
+                    icon: getCustomIcon(bookmark)
                 };
                 state.editingBookmarkId = bookmark.id;
                 state.draft = null;
@@ -3608,7 +3613,7 @@
                         category,
                         subCategory,
                         tags,
-                        icon: icon || getFaviconUrl(url)
+                        icon
                     };
                     showToast('网站已更新', 1500);
                 }
@@ -3621,7 +3626,7 @@
                     category,
                     subCategory,
                     tags,
-                    icon: icon || getFaviconUrl(url),
+                    icon,
                     order: state.bookmarks.length
                 };
                 state.bookmarks.push(newBookmark);
@@ -3661,7 +3666,8 @@
             }
         }
 
-        // 获取网站favicon
+        // 生成网站 favicon 地址。
+        // 注意：现在不再用它自动生成图标，仅用于识别老数据中「系统自动抓取」的 favicon（见 getCustomIcon）。
         function getFaviconUrl(url) {
             try {
                 const domain = new URL(url).hostname;
