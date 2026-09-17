@@ -1,0 +1,24 @@
+// ============================================================
+// 账号体系 · KV 绑定片段（合并进新项目的 wrangler.jsonc）
+// ============================================================
+// 这是「一套账号、多应用复用」的核心：ACCOUNTS_KV 是中央账号库。
+// 每个新应用都必须把下面这条 KV 绑定到自己项目的 wrangler 配置里，
+// 并且 id 必须保持一致，账号数据才会互通。
+//
+// 接入步骤：
+//   1. 把下面 kv_namespaces 数组里的内容，合并进你项目 wrangler.jsonc 的
+//      "kv_namespaces" 字段（如果已有其他 KV，把这一项追加进去即可）。
+//   2. 确保 binding 名字就是 "ACCOUNTS_KV"（代码里写死了这个名字）。
+//
+// 注意：如果你的项目用 wrangler.toml（而非 jsonc），写法等价为：
+//   [[kv_namespaces]]
+//   binding = "ACCOUNTS_KV"
+//   id = "e8d41d4739e94a80b3f566fc0d549e96"
+{
+  "kv_namespaces": [
+    {
+      "binding": "ACCOUNTS_KV",
+      "id": "e8d41d4739e94a80b3f566fc0d549e96"
+    }
+  ]
+}
